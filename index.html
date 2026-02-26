@@ -5,277 +5,451 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Habit Tracker</title>
   <style>
-    :root {
-      --bg: #050505;
-      --surface: #121212;
-      --surface-2: #1a1a1a;
-      --text: #f5f7ff;
-      --muted: #9ca3af;
-      --primary: #00f2ff;
-      --secondary: #ff00ff;
-      --border: #2a2a2a;
+    :root{
+      /* Solid-color system (no gradients) */
+      --bg:#0b0d12;
+      --panel:#121522;
+      --panel-2:#0f1320;
+      --border:#22283a;
+      --text:#f5f7ff;
+      --muted:#98a2b3;
+
+      --accent-purple:#7c3aed;   /* electric purple */
+      --accent-blue:#2563eb;     /* cobalt-ish blue */
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+
+      --radius:16px;
+      --shadow: 0 18px 40px rgba(0,0,0,.45);
     }
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:var(--text);
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color: var(--text);
-      background: radial-gradient(circle at top right, rgba(255, 0, 255, 0.08), transparent 35%), var(--bg);
     }
 
-    .app {
-      width: min(1120px, 94vw);
-      margin: 18px auto;
-      display: grid;
-      gap: 14px;
-      grid-template-rows: auto 1fr auto;
-      min-height: calc(100vh - 36px);
+    .app{
+      width:min(1120px, 94vw);
+      margin:18px auto;
+      display:grid;
+      gap:14px;
+      min-height:calc(100vh - 36px);
+      grid-template-rows:auto 1fr auto;
     }
 
-    .panel {
-      background: linear-gradient(165deg, var(--surface-2), var(--surface));
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 16px 32px rgba(0, 0, 0, 0.35);
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px;
-      flex-wrap: wrap;
+    header{
+      padding:14px 14px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
-    h1 {
-      margin: 0;
-      font-size: clamp(1.1rem, 2.4vw, 1.6rem);
-      letter-spacing: 0.04em;
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.28);
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    h1{
+      margin:0;
+      font-size:1.15rem;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-weight:800;
+    }
+    .meta{
+      color:var(--muted);
+      font-size:.86rem;
     }
 
-    .meta {
-      font-size: 0.86rem;
-      color: var(--muted);
-      margin-top: 4px;
+    .controls{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
     }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+    .tabs{
+      display:inline-flex;
+      gap:6px;
+      background:var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:4px;
+    }
+    .tab{
+      border:0;
+      background:transparent;
+      color:var(--muted);
+      border-radius:999px;
+      padding:9px 12px;
+      font-weight:800;
+      cursor:pointer;
+      letter-spacing:.02em;
+    }
+    .tab.active{
+      background:var(--accent-blue);
+      color:#fff;
     }
 
-    .tabs {
-      display: inline-flex;
-      gap: 6px;
-      background: #0f0f0f;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 4px;
+    .btn{
+      border:1px solid var(--border);
+      background:var(--panel-2);
+      color:var(--text);
+      border-radius:12px;
+      padding:9px 12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .btn.primary{
+      border-color:transparent;
+      background:var(--accent-purple);
+      color:#fff;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    /* Main split layout */
+    main{
+      display:grid;
+      gap:14px;
+      padding:14px;
+      min-height:0; /* important for scroll areas */
+      grid-template-rows: 0.95fr 1.05fr; /* top slightly under half */
     }
 
-    .tab {
-      border: 0;
-      background: transparent;
-      color: var(--muted);
-      border-radius: 999px;
-      padding: 9px 13px;
-      font-weight: 700;
-      cursor: pointer;
+    .section{
+      background:var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:12px;
+      min-height:0;
     }
 
-    .tab.active {
-      color: var(--text);
-      background: linear-gradient(90deg, rgba(0,242,255,.18), rgba(255,0,255,.22));
-      box-shadow: 0 0 10px rgba(0, 242, 255, 0.26);
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      margin-bottom:10px;
+      flex-wrap:wrap;
     }
 
-    .btn {
-      border: 1px solid #30424b;
-      background: linear-gradient(120deg, rgba(0,242,255,.14), rgba(255,0,255,.2));
-      color: var(--text);
-      border-radius: 10px;
-      padding: 9px 12px;
-      font-weight: 700;
-      cursor: pointer;
+    .section-title{
+      margin:0;
+      font-size:.9rem;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-weight:900;
+      color:#e9ecff;
+    }
+    .section-sub{
+      color:var(--muted);
+      font-size:.85rem;
+      margin:0;
     }
 
-    main { padding: 14px; }
+    /* Top: habits table */
+    .table-wrap{
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0c0f19;
+    }
+    table{
+      width:100%;
+      min-width:840px;
+      border-collapse:collapse;
+    }
+    th, td{
+      border-right:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+      padding:10px;
+      text-align:center;
+      font-size:.92rem;
+      background:#0c0f19;
+    }
+    th{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:#0f1320;
+      color:#dbe1ff;
+      font-size:.78rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-weight:900;
+    }
+    th:first-child, td:first-child{ text-align:left; }
+    th:last-child, td:last-child{ border-right:none; }
+    tr:last-child td{ border-bottom:none; }
 
-    .view-title {
-      margin: 0 0 10px;
-      font-size: 0.95rem;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: #d5d9e2;
+    .habit-name{
+      font-weight:900;
+      letter-spacing:.01em;
     }
 
-    .empty {
-      border: 1px dashed #3a3a3a;
-      border-radius: 12px;
-      background: #0f0f0f;
-      color: var(--muted);
-      text-align: center;
-      padding: 24px;
+    /* Solid checkbox */
+    input[type="checkbox"]{
+      appearance:none;
+      -webkit-appearance:none;
+      width:22px;
+      height:22px;
+      border-radius:6px;
+      border:1px solid #3a425c;
+      background:#0b0d12;
+      cursor:pointer;
+      position:relative;
+    }
+    input[type="checkbox"]:checked{
+      border-color:transparent;
+      background:var(--accent-blue);
+    }
+    input[type="checkbox"]:checked::after{
+      content:'';
+      position:absolute;
+      left:7px;
+      top:2px;
+      width:5px;
+      height:11px;
+      border:solid #fff;
+      border-width:0 2px 2px 0;
+      transform:rotate(45deg);
     }
 
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      min-width: 840px;
-      border-collapse: collapse;
-      background: #0f0f0f;
-      border-radius: 10px;
-      overflow: hidden;
+    .progress{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      justify-content:flex-end;
+    }
+    .bar{
+      width:110px;
+      height:10px;
+      border-radius:999px;
+      background:#141a2b;
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+    .fill{
+      height:100%;
+      width:0%;
+      background:var(--accent-purple); /* solid */
+    }
+    .pct{
+      min-width:70px;
+      text-align:right;
+      color:var(--muted);
+      font-weight:800;
+      font-size:.85rem;
     }
 
-    th, td {
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 10px;
-      text-align: center;
-      font-size: 0.9rem;
+    .empty{
+      border:1px dashed #3a425c;
+      border-radius:14px;
+      padding:18px;
+      background:#0c0f19;
+      color:var(--muted);
+      text-align:center;
     }
 
-    th {
-      background: #141414;
-      color: #d7dbe3;
-      text-transform: uppercase;
-      font-size: 0.78rem;
-      letter-spacing: .06em;
+    /* Bottom: analytics */
+    .analytics-grid{
+      display:grid;
+      gap:12px;
+      grid-template-columns: 1.2fr 0.8fr;
+      min-height:0;
+    }
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap:12px;
+      min-height:0;
+    }
+    .card{
+      border:1px solid var(--border);
+      background:#0c0f19;
+      border-radius:16px;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:0;
+    }
+    .card-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .card-name{
+      font-weight:900;
+      line-height:1.15;
+      letter-spacing:.01em;
+    }
+    .pill{
+      font-size:.75rem;
+      font-weight:900;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#11162a;
+      border:1px solid var(--border);
+      color:#dbe1ff;
+      white-space:nowrap;
     }
 
-    th:first-child, td:first-child { text-align: left; }
-    tr:last-child td { border-bottom: none; }
-    th:last-child, td:last-child { border-right: none; }
-
-    .habit-name { font-weight: 700; }
-
-    input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 6px;
-      border: 1px solid #535353;
-      background: #101010;
-      cursor: pointer;
-      position: relative;
+    .ring-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
-
-    input[type="checkbox"]:checked {
-      border-color: var(--primary);
-      background: linear-gradient(135deg, rgba(0,242,255,.25), rgba(255,0,255,.32));
-      box-shadow: 0 0 10px rgba(0, 242, 255, .45);
+    .ring{
+      width:92px;
+      height:92px;
+      flex:0 0 auto;
     }
-
-    input[type="checkbox"]:checked::after {
-      content: '';
-      position: absolute;
-      left: 7px;
-      top: 2px;
-      width: 5px;
-      height: 11px;
-      border: solid white;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
+    .ring text{
+      font-weight:900;
+      fill:#fff;
+      font-size:10px;
+      letter-spacing:.06em;
     }
-
-    .progress-track {
-      height: 8px;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid #2f2f2f;
-      background: #1a1a1a;
-      margin-bottom: 4px;
+    .stats{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:0;
     }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      box-shadow: 0 0 10px rgba(0,242,255,.5);
+    .stat{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      color:var(--muted);
+      font-weight:800;
+      font-size:.85rem;
     }
+    .stat b{ color:#e9ecff; }
 
-    .progress-text { color: #cfd4de; font-size: .78rem; }
-
-    .heatmap {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(64px, 1fr));
-      gap: 10px;
+    .list{
+      border:1px solid var(--border);
+      background:#0c0f19;
+      border-radius:16px;
+      padding:12px;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
-
-    .cell {
-      border: 1px solid #303030;
-      border-radius: 10px;
-      aspect-ratio: 1/1;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      background: #131313;
+    .list h3{
+      margin:0;
+      font-size:.9rem;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-weight:900;
     }
-
-    .cell small { color: #d8dce6; }
-    .cell span { color: #f3f4f8; font-size: 0.78rem; }
-
-    footer {
-      padding: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+    .list-items{
+      overflow:auto;
+      padding-right:4px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-height:0;
     }
+    .item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#0f1320;
+    }
+    .item small{ color:var(--muted); font-weight:800; }
+    .badge{
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:.75rem;
+      color:#fff;
+      white-space:nowrap;
+    }
+    .badge.bad{ background:var(--bad); }
+    .badge.warn{ background:var(--warn); }
+    .badge.ok{ background:var(--ok); }
 
-    .foot-note { color: var(--muted); font-size: .82rem; }
+    footer{
+      padding:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .foot-note{ color:var(--muted); font-size:.82rem; font-weight:700; }
 
-    @media (max-width: 760px) {
-      .heatmap { grid-template-columns: repeat(4, minmax(56px, 1fr)); }
+    @media (max-width: 980px){
+      main{ grid-template-rows:auto auto; }
+      .analytics-grid{ grid-template-columns: 1fr; }
+      .cards{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <header class="panel">
-      <div>
+      <div class="title">
         <h1>Habit Tracker</h1>
         <div class="meta" id="dateMeta"></div>
       </div>
-      <div class="header-right">
+
+      <div class="controls">
         <nav class="tabs" aria-label="View Switcher">
           <button class="tab active" data-view="weekly">Weekly</button>
           <button class="tab" data-view="monthly">Monthly</button>
         </nav>
-        <button class="btn" id="exportBtn" title="Export data as JSON">Export JSON</button>
+        <button class="btn" id="exportBtn" title="Export data as JSON">Export</button>
+        <button class="btn primary" id="addHabitBtn">+ Habit</button>
       </div>
     </header>
 
-    <main class="panel" id="mainContent"></main>
+    <main class="panel" id="mainShell">
+      <!-- injected -->
+    </main>
 
     <footer class="panel">
-      <div class="foot-note">Data is saved locally in your browser.</div>
-      <button class="btn" id="addHabitBtn">+ Add Habit</button>
+      <div class="foot-note">Saved locally in your browser (no account, no server).</div>
+      <button class="btn" id="resetBtn" title="Clear local data">Reset</button>
     </footer>
   </div>
 
   <script>
-    const STORAGE_KEY = 'habit-tracker-single-file-v1';
-    const appState = loadFromDisk() || { habits: [] }; // { habits:[{id,name,created,completions:[YYYY-MM-DD]}] }
+    /** =========================
+     *  State & Persistence
+     * ========================= */
+    const STORAGE_KEY = 'habit-tracker-solid-ui-v1';
+    const appState = loadFromDisk() || { habits: [] };
     let activeView = 'weekly';
 
-    function loadFromDisk() {
+    function loadFromDisk(){
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      try {
+      if(!raw) return null;
+      try{
         const parsed = JSON.parse(raw);
-        if (!parsed || !Array.isArray(parsed.habits)) return null;
+        if(!parsed || !Array.isArray(parsed.habits)) return null;
         parsed.habits = parsed.habits.map(h => ({
           id: String(h.id || crypto.randomUUID()),
           name: String(h.name || 'Untitled Habit'),
@@ -283,198 +457,405 @@
           completions: Array.isArray(h.completions) ? h.completions : []
         }));
         return parsed;
-      } catch {
-        return null;
-      }
+      }catch{ return null; }
     }
 
-    function saveToDisk() {
+    function saveToDisk(){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
     }
 
-    function updateState(mutator) {
+    function updateState(mutator){
       mutator(appState);
       saveToDisk();
-      renderActiveView();
+      render();
     }
 
-    function formatDateKey(date) {
+    /** =========================
+     *  Date Helpers
+     * ========================= */
+    function formatDateKey(date){
       const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
       return `${y}-${m}-${d}`;
     }
 
-    function getCurrentISOWeekDates(ref = new Date()) {
+    function getISOWeekDates(ref = new Date()){
       const base = new Date(ref);
       const day = base.getDay();
       const mondayShift = day === 0 ? -6 : 1 - day;
       base.setDate(base.getDate() + mondayShift);
-      base.setHours(0, 0, 0, 0);
-      return Array.from({ length: 7 }, (_, i) => {
+      base.setHours(0,0,0,0);
+      return Array.from({length:7}, (_,i)=>{
         const d = new Date(base);
-        d.setDate(base.getDate() + i);
+        d.setDate(base.getDate()+i);
         return d;
       });
     }
 
-    function getCurrentMonthDays(ref = new Date()) {
+    function getMonthDays(ref = new Date()){
       const y = ref.getFullYear();
       const m = ref.getMonth();
-      const count = new Date(y, m + 1, 0).getDate();
-      return Array.from({ length: count }, (_, i) => new Date(y, m, i + 1));
+      const count = new Date(y, m+1, 0).getDate();
+      return Array.from({length:count}, (_,i)=> new Date(y, m, i+1));
     }
 
-    function isCompletedOn(habit, dateKey) {
+    /** =========================
+     *  Habit Logic
+     * ========================= */
+    function isCompletedOn(habit, dateKey){
       return habit.completions.includes(dateKey);
     }
 
-    function toggleCompletion(habitId, dateKey, checked) {
-      updateState((state) => {
-        const habit = state.habits.find(h => h.id === habitId);
-        if (!habit) return;
+    function toggleCompletion(habitId, dateKey, checked){
+      updateState((state)=>{
+        const habit = state.habits.find(h=>h.id===habitId);
+        if(!habit) return;
         const set = new Set(habit.completions);
-        if (checked) set.add(dateKey);
+        if(checked) set.add(dateKey);
         else set.delete(dateKey);
         habit.completions = [...set].sort();
       });
     }
 
-    function weekCompletionCount(habit, weekDates) {
-      return weekDates.reduce((count, d) => count + (isCompletedOn(habit, formatDateKey(d)) ? 1 : 0), 0);
+    function weekCount(habit, weekDates){
+      return weekDates.reduce((sum, d)=> sum + (isCompletedOn(habit, formatDateKey(d)) ? 1 : 0), 0);
     }
 
-    function dayConsistencyRate(dateKey) {
-      if (!appState.habits.length) return 0;
-      const completed = appState.habits.reduce((sum, h) => sum + (isCompletedOn(h, dateKey) ? 1 : 0), 0);
-      return completed / appState.habits.length;
+    function monthCount(habit, monthDays){
+      return monthDays.reduce((sum, d)=> sum + (isCompletedOn(habit, formatDateKey(d)) ? 1 : 0), 0);
     }
 
-    function setMetaDate() {
+    function daysSinceLastCompletion(habit){
+      if(!habit.completions.length) return Infinity;
+      const last = habit.completions[habit.completions.length - 1];
+      const lastDate = new Date(last + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const diffMs = today - lastDate;
+      return Math.floor(diffMs / (1000*60*60*24));
+    }
+
+    /** =========================
+     *  UI Rendering
+     * ========================= */
+    function setMetaDate(){
       const now = new Date();
       document.getElementById('dateMeta').textContent = now.toLocaleString(undefined, {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        weekday:'long', year:'numeric', month:'long', day:'numeric'
       });
     }
 
-    function renderActiveView() {
-      setMetaDate();
-      const main = document.getElementById('mainContent');
-      main.innerHTML = '';
-      if (activeView === 'weekly') main.appendChild(renderWeeklyView());
-      else main.appendChild(renderMonthlyView());
+    function escapeHTML(str){
+      return String(str)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
     }
 
-    function renderWeeklyView() {
-      const root = document.createElement('section');
-      const weekDates = getCurrentISOWeekDates();
+    function render(){
+      setMetaDate();
+      const shell = document.getElementById('mainShell');
+      shell.innerHTML = '';
+      shell.appendChild(renderDashboard());
+      bindDynamicEvents(shell);
+    }
+
+    function renderDashboard(){
+      const wrap = document.createElement('div');
+      wrap.style.display = 'grid';
+      wrap.style.gap = '14px';
+      wrap.style.height = '100%';
+      wrap.style.padding = '14px';
+      wrap.style.minHeight = '0';
+      wrap.style.gridTemplateRows = '0.95fr 1.05fr';
+
+      const top = document.createElement('section');
+      top.className = 'section';
+      top.appendChild(renderHabitsTop());
+
+      const bottom = document.createElement('section');
+      bottom.className = 'section';
+      bottom.appendChild(renderAnalyticsBottom());
+
+      wrap.appendChild(top);
+      wrap.appendChild(bottom);
+
+      return wrap;
+    }
+
+    function renderHabitsTop(){
+      const container = document.createElement('div');
+
+      const weekDates = getISOWeekDates();
       const start = weekDates[0].toLocaleDateString();
       const end = weekDates[6].toLocaleDateString();
-      root.innerHTML = `<h2 class="view-title">Week (Mon–Sun): ${start} → ${end}</h2>`;
+      const modeLabel = activeView === 'weekly'
+        ? `Week (Mon–Sun): ${start} → ${end}`
+        : `Month: ${new Date().toLocaleString(undefined, {month:'long', year:'numeric'})}`;
 
-      if (!appState.habits.length) {
-        root.innerHTML += '<div class="empty">No habits yet. Add one below.</div>';
-        return root;
+      container.innerHTML = `
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Habits</h2>
+            <p class="section-sub">${escapeHTML(modeLabel)}</p>
+          </div>
+        </div>
+      `;
+
+      if(!appState.habits.length){
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'No habits yet. Click “+ Habit” to add your first one.';
+        container.appendChild(empty);
+        return container;
       }
 
-      const wrap = document.createElement('div');
-      wrap.className = 'table-wrap';
+      const tableWrap = document.createElement('div');
+      tableWrap.className = 'table-wrap';
+
       const table = document.createElement('table');
+      const headerDays = activeView === 'weekly'
+        ? ['M','T','W','T','F','S','S']
+        : Array.from({length:31}, (_,i)=> String(i+1));
 
-      const headerDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-      table.innerHTML = `<thead><tr><th>Habit</th>${headerDays.map(d => `<th>${d}</th>`).join('')}<th>Progress</th></tr></thead><tbody></tbody>`;
-      const tbody = table.querySelector('tbody');
+      // build header
+      const thead = document.createElement('thead');
+      const hr = document.createElement('tr');
+      hr.innerHTML = `<th>Habit</th>` +
+        (activeView === 'weekly'
+          ? headerDays.map(d=>`<th>${d}</th>`).join('')
+          : headerDays.map(d=>`<th>${d}</th>`).join('')
+        ) +
+        `<th>Progress</th>`;
+      thead.appendChild(hr);
 
-      appState.habits.forEach((habit) => {
-        const tr = document.createElement('tr');
-        const completed = weekCompletionCount(habit, weekDates);
-        const percent = Math.round((completed / 7) * 100);
+      const tbody = document.createElement('tbody');
 
-        let row = `<td><div class="habit-name">${escapeHTML(habit.name)}</div></td>`;
-        weekDates.forEach((d) => {
-          const key = formatDateKey(d);
-          const checked = isCompletedOn(habit, key) ? 'checked' : '';
-          row += `<td><input type="checkbox" data-habit-id="${habit.id}" data-date="${key}" ${checked} aria-label="${habit.name} ${key}"></td>`;
+      if(activeView === 'weekly'){
+        appState.habits.forEach(habit=>{
+          const tr = document.createElement('tr');
+          const completed = weekCount(habit, weekDates);
+          const percent = Math.round((completed/7)*100);
+
+          let row = `<td><div class="habit-name">${escapeHTML(habit.name)}</div></td>`;
+          weekDates.forEach(d=>{
+            const key = formatDateKey(d);
+            const checked = isCompletedOn(habit, key) ? 'checked' : '';
+            row += `<td><input type="checkbox" data-habit-id="${habit.id}" data-date="${key}" ${checked}></td>`;
+          });
+
+          row += `
+            <td>
+              <div class="progress">
+                <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
+                <div class="pct">${completed}/7 • ${percent}%</div>
+              </div>
+            </td>
+          `;
+          tr.innerHTML = row;
+          tbody.appendChild(tr);
         });
+      } else {
+        const now = new Date();
+        const monthDays = getMonthDays(now);
+        const daysInMonth = monthDays.length;
 
-        row += `<td>
-          <div class="progress-track"><div class="progress-fill" style="width:${percent}%"></div></div>
-          <div class="progress-text">${completed}/7 (${percent}%)</div>
-        </td>`;
+        appState.habits.forEach(habit=>{
+          const tr = document.createElement('tr');
+          const completed = monthCount(habit, monthDays);
+          const percent = Math.round((completed / daysInMonth) * 100);
 
-        tr.innerHTML = row;
-        tbody.appendChild(tr);
-      });
+          let row = `<td><div class="habit-name">${escapeHTML(habit.name)}</div></td>`;
+          for(let day=1; day<=31; day++){
+            const date = monthDays[day-1];
+            if(!date){
+              row += `<td style="opacity:.35">—</td>`;
+              continue;
+            }
+            const key = formatDateKey(date);
+            const checked = isCompletedOn(habit, key) ? 'checked' : '';
+            row += `<td><input type="checkbox" data-habit-id="${habit.id}" data-date="${key}" ${checked}></td>`;
+          }
 
-      wrap.appendChild(table);
-      root.appendChild(wrap);
-
-      root.querySelectorAll('input[type="checkbox"]').forEach((box) => {
-        box.addEventListener('change', (event) => {
-          const { habitId, date } = event.target.dataset;
-          toggleCompletion(habitId, date, event.target.checked);
+          row += `
+            <td>
+              <div class="progress">
+                <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
+                <div class="pct">${completed}/${daysInMonth} • ${percent}%</div>
+              </div>
+            </td>
+          `;
+          tr.innerHTML = row;
+          tbody.appendChild(tr);
         });
-      });
+      }
 
-      return root;
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      tableWrap.appendChild(table);
+      container.appendChild(tableWrap);
+
+      return container;
     }
 
-    function renderMonthlyView() {
-      const root = document.createElement('section');
+    function ringChartSVG(percent, color){
+      const size = 92;
+      const r = 36;
+      const cx = size/2;
+      const cy = size/2;
+      const circumference = 2 * Math.PI * r;
+      const clamped = Math.max(0, Math.min(100, percent));
+      const offset = circumference * (1 - clamped/100);
+
+      return `
+        <svg class="ring" viewBox="0 0 ${size} ${size}" role="img" aria-label="${clamped}%">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1b2236" stroke-width="10" />
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="10"
+                  stroke-linecap="round"
+                  stroke-dasharray="${circumference}"
+                  stroke-dashoffset="${offset}"
+                  transform="rotate(-90 ${cx} ${cy})"/>
+          <text x="${cx}" y="${cy+4}" text-anchor="middle">${clamped}%</text>
+        </svg>
+      `;
+    }
+
+    function statusBadge(days){
+      if(days === Infinity) return { cls:'bad', label:'Never' };
+      if(days >= 7) return { cls:'bad', label:`${days}d` };
+      if(days >= 3) return { cls:'warn', label:`${days}d` };
+      return { cls:'ok', label:`${days}d` };
+    }
+
+    function renderAnalyticsBottom(){
+      const container = document.createElement('div');
+
       const now = new Date();
-      const monthDays = getCurrentMonthDays(now);
-      root.innerHTML = `<h2 class="view-title">Month: ${now.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</h2>`;
+      const monthDays = getMonthDays(now);
+      const daysInMonth = monthDays.length;
+      const weekDates = getISOWeekDates();
 
-      if (!appState.habits.length) {
-        root.innerHTML += '<div class="empty">No habits available for analytics yet.</div>';
-        return root;
+      container.innerHTML = `
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">Analytics</h2>
+            <p class="section-sub">Solid, simple signals: what’s working and what’s slipping.</p>
+          </div>
+        </div>
+      `;
+
+      if(!appState.habits.length){
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'Add at least one habit to see analytics.';
+        container.appendChild(empty);
+        return container;
       }
 
-      const heatmap = document.createElement('div');
-      heatmap.className = 'heatmap';
+      const grid = document.createElement('div');
+      grid.className = 'analytics-grid';
 
-      for (let day = 1; day <= 31; day++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
+      // Left: ring cards
+      const cards = document.createElement('div');
+      cards.className = 'cards';
 
-        const date = monthDays[day - 1];
-        if (date) {
-          const key = formatDateKey(date);
-          const rate = dayConsistencyRate(key);
-          const alphaA = 0.08 + rate * 0.6;
-          const alphaB = 0.12 + rate * 0.72;
-          cell.style.background = `linear-gradient(145deg, rgba(0,242,255,${alphaA}), rgba(255,0,255,${alphaB}))`;
-          cell.style.boxShadow = rate > 0 ? `0 0 ${6 + rate * 18}px rgba(0, 242, 255, ${rate * 0.45})` : 'none';
-          cell.innerHTML = `<small>Day ${day}</small><span>${Math.round(rate * 100)}%</span>`;
-          cell.title = `${key}: ${Math.round(rate * 100)}% consistency`;
-        } else {
-          cell.style.opacity = '0.28';
-          cell.innerHTML = `<small>--</small><span>N/A</span>`;
-        }
+      // Sort habits by best monthly rate
+      const ranked = [...appState.habits].map(h=>{
+        const m = monthCount(h, monthDays);
+        const w = weekCount(h, weekDates);
+        return {
+          habit: h,
+          monthDone: m,
+          monthPct: Math.round((m / daysInMonth) * 100),
+          weekDone: w,
+          weekPct: Math.round((w / 7) * 100),
+          since: daysSinceLastCompletion(h)
+        };
+      }).sort((a,b)=> b.monthPct - a.monthPct);
 
-        heatmap.appendChild(cell);
-      }
+      ranked.slice(0, 6).forEach((r, idx)=>{
+        const color = (idx % 2 === 0) ? 'var(--accent-purple)' : 'var(--accent-blue)';
+        const last = statusBadge(r.since);
 
-      root.appendChild(heatmap);
-      return root;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="card-name">${escapeHTML(r.habit.name)}</div>
+            <div class="pill">Month • ${r.monthDone}/${daysInMonth}</div>
+          </div>
+          <div class="ring-wrap">
+            ${ringChartSVG(r.monthPct, color)}
+            <div class="stats">
+              <div class="stat"><span>Week</span><b>${r.weekDone}/7 (${r.weekPct}%)</b></div>
+              <div class="stat"><span>Last done</span><b>${r.since === Infinity ? 'Never' : r.since + ' days ago'}</b></div>
+              <div class="stat"><span>Status</span><b style="color:#fff">${last.cls === 'ok' ? 'On track' : (last.cls === 'warn' ? 'Slipping' : 'Neglected')}</b></div>
+            </div>
+          </div>
+        `;
+        cards.appendChild(card);
+      });
+
+      // Right: neglected list
+      const list = document.createElement('div');
+      list.className = 'list';
+
+      const neglected = [...ranked].sort((a,b)=> b.since - a.since);
+
+      list.innerHTML = `<h3>Neglected</h3><div class="list-items"></div>`;
+      const listItems = list.querySelector('.list-items');
+
+      neglected.slice(0, 10).forEach(r=>{
+        const b = statusBadge(r.since);
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.innerHTML = `
+          <div>
+            <div style="font-weight:900">${escapeHTML(r.habit.name)}</div>
+            <small>Month: ${r.monthPct}% • Week: ${r.weekPct}%</small>
+          </div>
+          <div class="badge ${b.cls}">${b.label}</div>
+        `;
+        listItems.appendChild(item);
+      });
+
+      grid.appendChild(cards);
+      grid.appendChild(list);
+      container.appendChild(grid);
+
+      return container;
     }
 
-    function bindViewSwitcher() {
-      document.querySelectorAll('.tab').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          activeView = btn.dataset.view;
-          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-          btn.classList.add('active');
-          renderActiveView();
+    function bindDynamicEvents(root){
+      // checkboxes
+      root.querySelectorAll('input[type="checkbox"]').forEach(box=>{
+        box.addEventListener('change', (e)=>{
+          const { habitId, date } = e.target.dataset;
+          toggleCompletion(habitId, date, e.target.checked);
         });
       });
     }
 
-    function bindAddHabit() {
-      document.getElementById('addHabitBtn').addEventListener('click', () => {
+    /** =========================
+     *  Static Controls
+     * ========================= */
+    function bindTopControls(){
+      document.querySelectorAll('.tab').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          activeView = btn.dataset.view;
+          document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+          btn.classList.add('active');
+          render();
+        });
+      });
+
+      document.getElementById('addHabitBtn').addEventListener('click', ()=>{
         const name = prompt('Habit name:');
-        if (!name || !name.trim()) return;
-        updateState((state) => {
+        if(!name || !name.trim()) return;
+        updateState((state)=>{
           state.habits.push({
             id: crypto.randomUUID(),
             name: name.trim(),
@@ -483,34 +864,28 @@
           });
         });
       });
-    }
 
-    function bindExport() {
-      document.getElementById('exportBtn').addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+      document.getElementById('exportBtn').addEventListener('click', ()=>{
+        const blob = new Blob([JSON.stringify(appState, null, 2)], { type:'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `habit-tracker-export-${formatDateKey(new Date())}.json`;
+        a.download = `habit-tracker-${formatDateKey(new Date())}.json`;
         a.click();
         URL.revokeObjectURL(url);
       });
+
+      document.getElementById('resetBtn').addEventListener('click', ()=>{
+        const ok = confirm('Reset will delete habits and history on this device. Continue?');
+        if(!ok) return;
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      });
     }
 
-    function escapeHTML(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function init() {
-      bindViewSwitcher();
-      bindAddHabit();
-      bindExport();
-      renderActiveView();
+    function init(){
+      bindTopControls();
+      render();
     }
 
     init();
