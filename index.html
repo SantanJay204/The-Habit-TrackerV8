@@ -1,0 +1,867 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/index.html b/index.html
+index 168ec98c60eadcc30fd634308eb583ad37d6b499..4634e63997318a047050ff8ab8e85cbb4423dbc7 100644
+--- a/index.html
++++ b/index.html
+@@ -1,527 +1,529 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-  <title>Stack Habit Tracker</title>
++  <title>Habit Tracker</title>
+   <style>
+     :root {
+-      --bg: #0a0a0a;
+-      --card: #1a1a1a;
+-      --text: #f5f5f5;
+-      --muted: #999;
+-      --cyan: #00f2ff;
+-      --purple: #bc00ff;
+-      --line: #2a2a2a;
+-      --success: #00f2ff;
++      --bg: #050505;
++      --surface: #121212;
++      --surface-2: #1a1a1a;
++      --text: #f5f7ff;
++      --muted: #9ca3af;
++      --primary: #00f2ff;
++      --secondary: #ff00ff;
++      --border: #2a2a2a;
++      --ok: #35ff9f;
+     }
+ 
+     * { box-sizing: border-box; }
+ 
+     body {
+       margin: 0;
+-      font-family: Inter, Segoe UI, Roboto, sans-serif;
+-      background: radial-gradient(circle at top right, #1a0d24 0%, var(--bg) 35%), var(--bg);
+-      color: var(--text);
+       min-height: 100vh;
++      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
++      color: var(--text);
++      background: radial-gradient(circle at top right, rgba(255, 0, 255, 0.08), transparent 35%), var(--bg);
+     }
+ 
+-    .container {
+-      width: min(1150px, 94vw);
+-      margin: 28px auto;
++    .app {
++      width: min(1120px, 94vw);
++      margin: 18px auto;
+       display: grid;
+-      gap: 16px;
++      gap: 14px;
++      grid-template-rows: auto 1fr auto;
++      min-height: calc(100vh - 36px);
+     }
+ 
+-    .header,
+-    .card {
+-      background: linear-gradient(160deg, #202020 0%, var(--card) 70%);
+-      border: 1px solid #2a2a2a;
+-      border-radius: 16px;
+-      box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 18px 40px rgba(0,0,0,0.45);
++    .panel {
++      background: linear-gradient(165deg, var(--surface-2), var(--surface));
++      border: 1px solid var(--border);
++      border-radius: 14px;
++      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), 0 16px 32px rgba(0, 0, 0, 0.35);
+     }
+ 
+-    .header {
+-      padding: 18px;
++    header {
+       display: flex;
+-      align-items: center;
+       justify-content: space-between;
++      align-items: center;
+       gap: 12px;
++      padding: 14px;
+       flex-wrap: wrap;
+     }
+ 
+     h1 {
+       margin: 0;
+-      font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+-      letter-spacing: 0.03em;
+-      font-weight: 700;
+-      text-shadow: 0 0 12px rgba(0, 242, 255, 0.25);
++      font-size: clamp(1.1rem, 2.4vw, 1.6rem);
++      letter-spacing: 0.04em;
++      text-shadow: 0 0 10px rgba(0, 242, 255, 0.28);
++    }
++
++    .meta {
++      font-size: 0.86rem;
++      color: var(--muted);
++      margin-top: 4px;
++    }
++
++    .header-right {
++      display: flex;
++      align-items: center;
++      gap: 10px;
+     }
+ 
+     .tabs {
+       display: inline-flex;
+-      background: #121212;
+-      border: 1px solid var(--line);
++      gap: 6px;
++      background: #0f0f0f;
++      border: 1px solid var(--border);
+       border-radius: 999px;
+       padding: 4px;
+     }
+ 
+     .tab {
+-      border: none;
++      border: 0;
+       background: transparent;
+       color: var(--muted);
+-      font-weight: 600;
+-      padding: 10px 14px;
+       border-radius: 999px;
++      padding: 9px 13px;
++      font-weight: 700;
+       cursor: pointer;
+-      transition: 220ms ease;
+     }
+ 
+     .tab.active {
+       color: var(--text);
+-      background: linear-gradient(90deg, rgba(0, 242, 255, 0.22), rgba(188, 0, 255, 0.24));
+-      box-shadow: 0 0 12px rgba(0, 242, 255, 0.25);
+-    }
+-
+-    .actions {
+-      display: flex;
+-      align-items: center;
+-      gap: 12px;
++      background: linear-gradient(90deg, rgba(0,242,255,.18), rgba(255,0,255,.22));
++      box-shadow: 0 0 10px rgba(0, 242, 255, 0.26);
+     }
+ 
+     .btn {
+-      border: 1px solid #344;
+-      border-radius: 10px;
+-      padding: 10px 14px;
++      border: 1px solid #30424b;
++      background: linear-gradient(120deg, rgba(0,242,255,.14), rgba(255,0,255,.2));
+       color: var(--text);
++      border-radius: 10px;
++      padding: 9px 12px;
++      font-weight: 700;
+       cursor: pointer;
+-      font-weight: 600;
+-      letter-spacing: 0.02em;
+-      background: linear-gradient(120deg, rgba(0,242,255,0.2), rgba(188,0,255,0.2));
+-      transition: transform 180ms ease, box-shadow 180ms ease;
+     }
+ 
+-    .btn:hover {
+-      transform: translateY(-1px);
+-      box-shadow: 0 0 14px rgba(188, 0, 255, 0.35);
++    main {
++      padding: 14px;
+     }
+ 
+-    .card {
+-      padding: 18px;
+-      overflow: hidden;
++    .view-title {
++      margin: 0 0 10px;
++      font-size: 0.95rem;
++      letter-spacing: .08em;
++      text-transform: uppercase;
++      color: #d5d9e2;
+     }
+ 
+-    .view { display: none; }
+-    .view.active { display: block; }
+-
+-    .week-title,
+-    .month-title {
+-      margin: 0 0 12px;
+-      color: #ddd;
+-      font-size: 0.98rem;
+-      letter-spacing: 0.06em;
+-      text-transform: uppercase;
++    .empty {
++      border: 1px dashed #3a3a3a;
++      border-radius: 12px;
++      background: #0f0f0f;
++      color: var(--muted);
++      text-align: center;
++      padding: 24px;
+     }
+ 
+-    .weekly-wrap { overflow-x: auto; }
++    .table-wrap { overflow-x: auto; }
+ 
+     table {
+       width: 100%;
++      min-width: 840px;
+       border-collapse: collapse;
+-      min-width: 860px;
+-      background: #111;
+-      border-radius: 12px;
++      background: #0f0f0f;
++      border-radius: 10px;
+       overflow: hidden;
+     }
+ 
+-    th,
+-    td {
+-      border-bottom: 1px solid var(--line);
+-      border-right: 1px solid var(--line);
+-      text-align: center;
++    th, td {
++      border-right: 1px solid var(--border);
++      border-bottom: 1px solid var(--border);
+       padding: 10px;
+-      font-size: 0.92rem;
++      text-align: center;
++      font-size: 0.9rem;
+     }
+ 
+-    th:first-child,
+-    td:first-child { text-align: left; }
+-
+-    tr:last-child td { border-bottom: none; }
+-    th:last-child,
+-    td:last-child { border-right: none; }
+-
+     th {
+-      color: #cfcfcf;
+-      font-size: 0.8rem;
++      background: #141414;
++      color: #d7dbe3;
+       text-transform: uppercase;
+-      letter-spacing: 0.06em;
+-      background: #161616;
+-      position: sticky;
+-      top: 0;
+-      z-index: 1;
++      font-size: 0.78rem;
++      letter-spacing: .06em;
+     }
+ 
+-    .habit-name { font-weight: 600; }
+-    .target { color: var(--muted); font-size: 0.85rem; }
+-
+-    .progress-track {
+-      width: 100%;
+-      height: 9px;
+-      border-radius: 999px;
+-      overflow: hidden;
+-      background: #252525;
+-      border: 1px solid #353535;
+-      margin-bottom: 4px;
+-    }
+-
+-    .progress-fill {
+-      height: 100%;
+-      width: 0;
+-      background: linear-gradient(90deg, var(--cyan), var(--purple));
+-      box-shadow: 0 0 10px rgba(0, 242, 255, 0.55);
+-      transition: width 250ms ease;
+-    }
+-
+-    .progress-text {
+-      color: #c8c8c8;
+-      font-size: 0.8rem;
+-    }
++    th:first-child, td:first-child { text-align: left; }
++    tr:last-child td { border-bottom: none; }
++    th:last-child, td:last-child { border-right: none; }
+ 
+-    .check-wrap {
+-      display: inline-flex;
+-      justify-content: center;
+-      align-items: center;
+-    }
++    .habit-name { font-weight: 700; }
+ 
+     input[type="checkbox"] {
+       appearance: none;
+       -webkit-appearance: none;
+       width: 22px;
+       height: 22px;
+       border-radius: 6px;
+-      border: 1px solid #4f4f4f;
++      border: 1px solid #535353;
+       background: #101010;
+       cursor: pointer;
+       position: relative;
+-      transition: all 200ms ease;
+-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+     }
+ 
+     input[type="checkbox"]:checked {
+-      border-color: var(--cyan);
+-      background: linear-gradient(135deg, rgba(0,242,255,0.24), rgba(188,0,255,0.36));
+-      box-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0 16px rgba(188, 0, 255, 0.35);
+-      transform: scale(1.04);
++      border-color: var(--primary);
++      background: linear-gradient(135deg, rgba(0,242,255,.25), rgba(255,0,255,.32));
++      box-shadow: 0 0 10px rgba(0, 242, 255, .45);
+     }
+ 
+     input[type="checkbox"]:checked::after {
+-      content: "";
++      content: '';
+       position: absolute;
+-      left: 6px;
++      left: 7px;
+       top: 2px;
+-      width: 6px;
+-      height: 12px;
++      width: 5px;
++      height: 11px;
+       border: solid white;
+       border-width: 0 2px 2px 0;
+       transform: rotate(45deg);
+     }
+ 
++    .progress-track {
++      height: 8px;
++      border-radius: 999px;
++      overflow: hidden;
++      border: 1px solid #2f2f2f;
++      background: #1a1a1a;
++      margin-bottom: 4px;
++    }
++
++    .progress-fill {
++      height: 100%;
++      background: linear-gradient(90deg, var(--primary), var(--secondary));
++      box-shadow: 0 0 10px rgba(0,242,255,.5);
++    }
++
++    .progress-text { color: #cfd4de; font-size: .78rem; }
++
+     .heatmap {
+       display: grid;
+       grid-template-columns: repeat(7, minmax(64px, 1fr));
+       gap: 10px;
+     }
+ 
+     .cell {
+-      aspect-ratio: 1 / 1;
+-      border-radius: 10px;
+       border: 1px solid #303030;
+-      background: #151515;
++      border-radius: 10px;
++      aspect-ratio: 1/1;
++      padding: 8px;
+       display: flex;
+       flex-direction: column;
+-      align-items: flex-start;
+       justify-content: space-between;
+-      padding: 8px;
+-      transition: transform 160ms ease;
++      background: #131313;
+     }
+ 
+-    .cell:hover { transform: translateY(-2px); }
+-
+-    .cell-day { font-size: 0.8rem; color: #ddd; }
+-    .cell-rate { font-size: 0.75rem; color: #ececec; opacity: 0.9; }
++    .cell small { color: #d8dce6; }
++    .cell span { color: #f3f4f8; font-size: 0.78rem; }
+ 
+-    .legend {
+-      margin-top: 14px;
++    footer {
++      padding: 14px;
+       display: flex;
+-      gap: 10px;
++      justify-content: space-between;
+       align-items: center;
+-      color: #bdbdbd;
+-      font-size: 0.82rem;
+-    }
+-
+-    .legend .swatch {
+-      width: 22px;
+-      height: 12px;
+-      border-radius: 999px;
+-      border: 1px solid #404040;
+-      background: linear-gradient(90deg, rgba(0,242,255,0.12), rgba(188,0,255,0.88));
++      gap: 10px;
++      flex-wrap: wrap;
+     }
+ 
+-    .empty {
+-      padding: 26px;
+-      text-align: center;
+-      color: var(--muted);
+-      border: 1px dashed #333;
+-      border-radius: 12px;
+-      background: #121212;
+-    }
++    .foot-note { color: var(--muted); font-size: .82rem; }
+ 
+     @media (max-width: 760px) {
+-      .heatmap { grid-template-columns: repeat(4, minmax(58px, 1fr)); }
++      .heatmap { grid-template-columns: repeat(4, minmax(56px, 1fr)); }
+     }
+   </style>
+ </head>
+ <body>
+-  <main class="container">
+-    <section class="header">
+-      <h1>Habit Tracker // Stack Mode</h1>
+-      <div class="actions">
+-        <div class="tabs">
+-          <button class="tab active" data-view="weekly">Weekly View</button>
+-          <button class="tab" data-view="monthly">Monthly Progress</button>
+-        </div>
+-        <button class="btn" id="addHabitBtn">+ Add Habit</button>
++  <div class="app">
++    <header class="panel">
++      <div>
++        <h1>Habit Tracker</h1>
++        <div class="meta" id="dateMeta"></div>
+       </div>
+-    </section>
++      <div class="header-right">
++        <nav class="tabs" aria-label="View Switcher">
++          <button class="tab active" data-view="weekly">Weekly Operations</button>
++          <button class="tab" data-view="monthly">Monthly Analytics</button>
++        </nav>
++        <button class="btn" id="exportBtn" title="Export data as JSON">Export JSON</button>
++      </div>
++    </header>
+ 
+-    <section class="card view active" id="weeklyView">
+-      <h2 class="week-title" id="weekLabel">Week</h2>
+-      <div class="weekly-wrap" id="weeklyTableWrap"></div>
+-    </section>
++    <main class="panel" id="mainContent"></main>
+ 
+-    <section class="card view" id="monthlyView">
+-      <h2 class="month-title" id="monthLabel">Month</h2>
+-      <div class="heatmap" id="heatmap"></div>
+-      <div class="legend"><span class="swatch"></span> Lower completion → Higher completion</div>
+-    </section>
+-  </main>
++    <footer class="panel">
++      <div class="foot-note">Data is saved locally in your browser.</div>
++      <button class="btn" id="addHabitBtn">+ Add Habit</button>
++    </footer>
++  </div>
+ 
+   <script>
+-    const STORAGE_KEY = 'stackHabitTrackerData';
+-
+-    const defaultState = {
+-      habits: [
+-        { id: crypto.randomUUID(), name: 'Workout', target: 5 },
+-        { id: crypto.randomUUID(), name: 'Read', target: 4 }
+-      ],
+-      entries: {}
+-    };
++    /** ---------- App State & Persistence ---------- */
++    const STORAGE_KEY = 'habit-tracker-single-file-v1';
++    const appState = loadFromDisk() || { habits: [] }; // { habits:[{id,name,created,completions:[YYYY-MM-DD]}] }
++    let activeView = 'weekly';
+ 
+-    let state = loadState();
+-
+-    function loadState() {
++    function loadFromDisk() {
+       const raw = localStorage.getItem(STORAGE_KEY);
+-      if (!raw) return structuredClone(defaultState);
++      if (!raw) return null;
+       try {
+         const parsed = JSON.parse(raw);
+-        if (!Array.isArray(parsed.habits) || typeof parsed.entries !== 'object') throw new Error('Invalid data');
++        if (!parsed || !Array.isArray(parsed.habits)) return null;
++        parsed.habits = parsed.habits.map(h => ({
++          id: String(h.id || crypto.randomUUID()),
++          name: String(h.name || 'Untitled Habit'),
++          created: h.created || new Date().toISOString(),
++          completions: Array.isArray(h.completions) ? h.completions : []
++        }));
+         return parsed;
+       } catch {
+-        return structuredClone(defaultState);
++        return null;
+       }
+     }
+ 
+-    function saveState() {
+-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
++    function saveToDisk() {
++      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
++    }
++
++    function updateState(mutator) {
++      mutator(appState);
++      saveToDisk();
++      renderActiveView();
+     }
+ 
++    /** ---------- Date Helpers ---------- */
+     function formatDateKey(date) {
+       const y = date.getFullYear();
+       const m = String(date.getMonth() + 1).padStart(2, '0');
+       const d = String(date.getDate()).padStart(2, '0');
+       return `${y}-${m}-${d}`;
+     }
+ 
+-    function getStartOfWeekMonday(date = new Date()) {
+-      const d = new Date(date);
+-      const day = d.getDay();
+-      const diff = day === 0 ? -6 : 1 - day;
+-      d.setDate(d.getDate() + diff);
+-      d.setHours(0,0,0,0);
+-      return d;
+-    }
+-
+-    function getWeekDates() {
+-      const start = getStartOfWeekMonday();
++    function getCurrentISOWeekDates(ref = new Date()) {
++      const base = new Date(ref);
++      const day = base.getDay();
++      const mondayShift = day === 0 ? -6 : 1 - day;
++      base.setDate(base.getDate() + mondayShift);
++      base.setHours(0, 0, 0, 0);
+       return Array.from({ length: 7 }, (_, i) => {
+-        const d = new Date(start);
+-        d.setDate(start.getDate() + i);
++        const d = new Date(base);
++        d.setDate(base.getDate() + i);
+         return d;
+       });
+     }
+ 
+-    function getEntry(dateKey) {
+-      if (!state.entries[dateKey]) state.entries[dateKey] = {};
+-      return state.entries[dateKey];
++    function getCurrentMonthDays(ref = new Date()) {
++      const y = ref.getFullYear();
++      const m = ref.getMonth();
++      const count = new Date(y, m + 1, 0).getDate();
++      return Array.from({ length: count }, (_, i) => new Date(y, m, i + 1));
++    }
++
++    /** ---------- Habit Logic ---------- */
++    function isCompletedOn(habit, dateKey) {
++      return habit.completions.includes(dateKey);
+     }
+ 
+     function toggleCompletion(habitId, dateKey, checked) {
+-      const entry = getEntry(dateKey);
+-      if (checked) entry[habitId] = true;
+-      else delete entry[habitId];
+-      saveState();
+-      render();
++      updateState((state) => {
++        const habit = state.habits.find(h => h.id === habitId);
++        if (!habit) return;
++        const set = new Set(habit.completions);
++        if (checked) set.add(dateKey);
++        else set.delete(dateKey);
++        habit.completions = [...set].sort();
++      });
+     }
+ 
+-    function getHabitWeekCount(habitId, weekDates) {
+-      return weekDates.reduce((sum, date) => {
+-        const key = formatDateKey(date);
+-        return sum + (state.entries[key]?.[habitId] ? 1 : 0);
+-      }, 0);
++    function weekCompletionCount(habit, weekDates) {
++      return weekDates.reduce((count, d) => count + (isCompletedOn(habit, formatDateKey(d)) ? 1 : 0), 0);
+     }
+ 
+-    function renderWeeklyView() {
+-      const weekDates = getWeekDates();
+-      const weekLabel = document.getElementById('weekLabel');
+-      const weeklyTableWrap = document.getElementById('weeklyTableWrap');
+-      const start = weekDates[0];
+-      const end = weekDates[6];
+-      weekLabel.textContent = `Week: ${start.toLocaleDateString()} → ${end.toLocaleDateString()} (Mon-Sun)`;
+-
+-      if (!state.habits.length) {
+-        weeklyTableWrap.innerHTML = '<div class="empty">No habits yet. Use <strong>Add Habit</strong> to begin tracking.</div>';
+-        return;
+-      }
++    function dayConsistencyRate(dateKey) {
++      if (!appState.habits.length) return 0;
++      const completed = appState.habits.reduce((sum, h) => sum + (isCompletedOn(h, dateKey) ? 1 : 0), 0);
++      return completed / appState.habits.length;
++    }
+ 
+-      const dayFormatter = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric' });
+-      let html = '<table><thead><tr><th>Habit</th>';
+-      for (const date of weekDates) html += `<th>${dayFormatter.format(date)}</th>`;
+-      html += '<th>Target</th><th>Progress</th></tr></thead><tbody>';
++    /** ---------- Rendering ---------- */
++    function setMetaDate() {
++      const now = new Date();
++      document.getElementById('dateMeta').textContent = now.toLocaleString(undefined, {
++        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
++      });
++    }
+ 
+-      for (const habit of state.habits) {
+-        const completed = getHabitWeekCount(habit.id, weekDates);
+-        const fillPercent = Math.min((completed / Math.max(habit.target, 1)) * 100, 100);
++    function renderActiveView() {
++      setMetaDate();
++      const main = document.getElementById('mainContent');
++      main.innerHTML = ''; // clear DOM then rerender based on current appState
++      if (activeView === 'weekly') main.appendChild(renderWeeklyView());
++      else main.appendChild(renderMonthlyView());
++    }
+ 
+-        html += `<tr><td><div class="habit-name">${escapeHtml(habit.name)}</div></td>`;
++    function renderWeeklyView() {
++      const root = document.createElement('section');
++      const weekDates = getCurrentISOWeekDates();
++      const start = weekDates[0].toLocaleDateString();
++      const end = weekDates[6].toLocaleDateString();
+ 
+-        for (const date of weekDates) {
+-          const key = formatDateKey(date);
+-          const checked = !!state.entries[key]?.[habit.id];
+-          html += `
+-            <td>
+-              <label class="check-wrap">
+-                <input type="checkbox" data-habit-id="${habit.id}" data-date="${key}" ${checked ? 'checked' : ''}>
+-              </label>
+-            </td>`;
+-        }
++      root.innerHTML = `<h2 class="view-title">Current ISO Week (Mon-Sun): ${start} → ${end}</h2>`;
+ 
+-        html += `
+-          <td class="target">${completed}/${habit.target} days</td>
+-          <td>
+-            <div class="progress-track"><div class="progress-fill" style="width: ${fillPercent}%"></div></div>
+-            <div class="progress-text">${Math.round(fillPercent)}%</div>
+-          </td>
+-        </tr>`;
++      if (!appState.habits.length) {
++        root.innerHTML += '<div class="empty">No habits yet. Add one from the footer to start tracking.</div>';
++        return root;
+       }
+ 
+-      html += '</tbody></table>';
+-      weeklyTableWrap.innerHTML = html;
++      const wrap = document.createElement('div');
++      wrap.className = 'table-wrap';
++      const table = document.createElement('table');
++
++      const headerDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
++      table.innerHTML = `<thead><tr><th>Habit</th>${headerDays.map(d => `<th>${d}</th>`).join('')}<th>Progress</th></tr></thead><tbody></tbody>`;
++      const tbody = table.querySelector('tbody');
++
++      appState.habits.forEach((habit) => {
++        const tr = document.createElement('tr');
++        const completed = weekCompletionCount(habit, weekDates);
++        const percent = Math.round((completed / 7) * 100);
+ 
+-      weeklyTableWrap.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+-        box.addEventListener('change', (e) => {
+-          const { habitId, date } = e.target.dataset;
+-          toggleCompletion(habitId, date, e.target.checked);
++        let row = `<td><div class="habit-name">${escapeHTML(habit.name)}</div></td>`;
++        weekDates.forEach((d) => {
++          const key = formatDateKey(d);
++          const checked = isCompletedOn(habit, key) ? 'checked' : '';
++          row += `<td><input type="checkbox" data-habit-id="${habit.id}" data-date="${key}" ${checked} aria-label="${habit.name} ${key}"></td>`;
+         });
++
++        row += `<td>
++          <div class="progress-track"><div class="progress-fill" style="width:${percent}%"></div></div>
++          <div class="progress-text">${completed}/7 (${percent}%)</div>
++        </td>`;
++
++        tr.innerHTML = row;
++        tbody.appendChild(tr);
+       });
+-    }
+ 
+-    function getCompletionRateForDate(dateKey) {
+-      if (!state.habits.length) return 0;
+-      const completed = state.habits.reduce((sum, habit) => sum + (state.entries[dateKey]?.[habit.id] ? 1 : 0), 0);
+-      return completed / state.habits.length;
+-    }
++      wrap.appendChild(table);
++      root.appendChild(wrap);
+ 
+-    function colorForRate(rate) {
+-      if (rate <= 0) return 'rgba(255,255,255,0.03)';
+-      const glow = 0.12 + rate * 0.5;
+-      const mid = Math.floor(rate * 100);
+-      return `linear-gradient(135deg, rgba(0,242,255,${glow}), rgba(188,0,255,${0.2 + rate * 0.65})), rgba(${mid}, 0, ${200 + mid/4}, 0.22)`;
++      root.querySelectorAll('input[type="checkbox"]').forEach((box) => {
++        box.addEventListener('change', (event) => {
++          const { habitId, date } = event.target.dataset;
++          // All checkbox toggles route through updateState() and saveToDisk().
++          toggleCompletion(habitId, date, event.target.checked);
++        });
++      });
++
++      return root;
+     }
+ 
+     function renderMonthlyView() {
++      const root = document.createElement('section');
+       const now = new Date();
+-      const year = now.getFullYear();
+-      const month = now.getMonth();
+-      const daysInMonth = new Date(year, month + 1, 0).getDate();
++      const monthDays = getCurrentMonthDays(now);
+ 
+-      document.getElementById('monthLabel').textContent = `Monthly Progress: ${now.toLocaleString(undefined, { month: 'long', year: 'numeric' })}`;
++      root.innerHTML = `<h2 class="view-title">Current Month: ${now.toLocaleString(undefined, { month: 'long', year: 'numeric' })}</h2>`;
++
++      if (!appState.habits.length) {
++        root.innerHTML += '<div class="empty">No habits available for analytics yet.</div>';
++        return root;
++      }
+ 
+-      const heatmap = document.getElementById('heatmap');
+-      heatmap.innerHTML = '';
++      const heatmap = document.createElement('div');
++      heatmap.className = 'heatmap';
+ 
+       for (let day = 1; day <= 31; day++) {
+         const cell = document.createElement('div');
+         cell.className = 'cell';
+ 
+-        if (day <= daysInMonth) {
+-          const d = new Date(year, month, day);
+-          const key = formatDateKey(d);
+-          const rate = getCompletionRateForDate(key);
+-          cell.style.background = colorForRate(rate);
+-          cell.style.boxShadow = rate > 0 ? `0 0 ${6 + rate * 16}px rgba(0, 242, 255, ${rate * 0.4})` : 'none';
+-          cell.innerHTML = `<span class="cell-day">Day ${day}</span><span class="cell-rate">${Math.round(rate * 100)}%</span>`;
+-          cell.title = `${key}: ${Math.round(rate * 100)}% habits completed`;
++        const date = monthDays[day - 1];
++        if (date) {
++          const key = formatDateKey(date);
++          const rate = dayConsistencyRate(key);
++          const alphaA = 0.08 + rate * 0.6;
++          const alphaB = 0.12 + rate * 0.72;
++          cell.style.background = `linear-gradient(145deg, rgba(0,242,255,${alphaA}), rgba(255,0,255,${alphaB}))`;
++          cell.style.boxShadow = rate > 0 ? `0 0 ${6 + rate * 18}px rgba(0, 242, 255, ${rate * 0.45})` : 'none';
++          cell.innerHTML = `<small>Day ${day}</small><span>${Math.round(rate * 100)}%</span>`;
++          cell.title = `${key}: ${Math.round(rate * 100)}% consistency`;
+         } else {
+-          cell.style.opacity = '0.25';
+-          cell.innerHTML = `<span class="cell-day">--</span><span class="cell-rate">N/A</span>`;
++          cell.style.opacity = '0.28';
++          cell.innerHTML = `<small>--</small><span>N/A</span>`;
+         }
+ 
+         heatmap.appendChild(cell);
+       }
+-    }
+ 
+-    function escapeHtml(value) {
+-      return value
+-        .replaceAll('&', '&amp;')
+-        .replaceAll('<', '&lt;')
+-        .replaceAll('>', '&gt;')
+-        .replaceAll('"', '&quot;')
+-        .replaceAll("'", '&#039;');
++      root.appendChild(heatmap);
++      return root;
+     }
+ 
+-    function addHabit() {
+-      const name = prompt('Habit name:');
+-      if (!name || !name.trim()) return;
+-
+-      const targetInput = prompt('Target days per week (1-7):', '5');
+-      let target = Number.parseInt(targetInput ?? '5', 10);
+-      if (Number.isNaN(target)) target = 5;
+-      target = Math.max(1, Math.min(7, target));
+-
+-      state.habits.push({ id: crypto.randomUUID(), name: name.trim(), target });
+-      saveState();
+-      render();
++    /** ---------- UI Actions ---------- */
++    function bindViewSwitcher() {
++      document.querySelectorAll('.tab').forEach((btn) => {
++        btn.addEventListener('click', () => {
++          activeView = btn.dataset.view;
++          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
++          btn.classList.add('active');
++          renderActiveView();
++        });
++      });
+     }
+ 
+-    function setupTabs() {
+-      document.querySelectorAll('.tab').forEach((tab) => {
+-        tab.addEventListener('click', () => {
+-          document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+-          document.querySelectorAll('.view').forEach((view) => view.classList.remove('active'));
+-          tab.classList.add('active');
+-          document.getElementById(tab.dataset.view + 'View').classList.add('active');
++    function bindAddHabit() {
++      document.getElementById('addHabitBtn').addEventListener('click', () => {
++        const name = prompt('Habit name:');
++        if (!name || !name.trim()) return;
++        updateState((state) => {
++          state.habits.push({
++            id: crypto.randomUUID(),
++            name: name.trim(),
++            created: new Date().toISOString(),
++            completions: []
++          });
+         });
+       });
+     }
+ 
+-    function render() {
+-      renderWeeklyView();
+-      renderMonthlyView();
++    function bindExport() {
++      document.getElementById('exportBtn').addEventListener('click', () => {
++        const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
++        const url = URL.createObjectURL(blob);
++        const a = document.createElement('a');
++        a.href = url;
++        a.download = `habit-tracker-export-${formatDateKey(new Date())}.json`;
++        a.click();
++        URL.revokeObjectURL(url);
++      });
++    }
++
++    function escapeHTML(str) {
++      return String(str)
++        .replaceAll('&', '&amp;')
++        .replaceAll('<', '&lt;')
++        .replaceAll('>', '&gt;')
++        .replaceAll('"', '&quot;')
++        .replaceAll("'", '&#39;');
++    }
++
++    function init() {
++      bindViewSwitcher();
++      bindAddHabit();
++      bindExport();
++      renderActiveView();
+     }
+ 
+-    document.getElementById('addHabitBtn').addEventListener('click', addHabit);
+-    setupTabs();
+-    render();
++    init();
+   </script>
+ </body>
+ </html>
+ 
+EOF
+)
