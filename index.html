@@ -6,19 +6,18 @@
   <title>Habit Tracker</title>
   <style>
     :root{
-      /* Solid-color system (no gradients) */
       --bg:#0b0d12;
       --panel:#121522;
-      --panel-2:#0f1320;
+      --panel2:#0f1320;
       --border:#22283a;
       --text:#f5f7ff;
       --muted:#98a2b3;
 
-      --accent-purple:#7c3aed;   /* electric purple */
-      --accent-blue:#2563eb;     /* cobalt-ish blue */
-      --ok:#22c55e;
-      --warn:#f59e0b;
-      --bad:#ef4444;
+      --purple:#7c3aed;
+      --blue:#2563eb;
+      --green:#22c55e;
+      --amber:#f59e0b;
+      --red:#ef4444;
 
       --radius:16px;
       --shadow: 0 18px 40px rgba(0,0,0,.45);
@@ -65,14 +64,15 @@
     }
     h1{
       margin:0;
-      font-size:1.15rem;
-      letter-spacing:.06em;
+      font-size:1.05rem;
+      letter-spacing:.10em;
       text-transform:uppercase;
-      font-weight:800;
+      font-weight:900;
     }
     .meta{
       color:var(--muted);
       font-size:.86rem;
+      font-weight:700;
     }
 
     .controls{
@@ -85,7 +85,7 @@
     .tabs{
       display:inline-flex;
       gap:6px;
-      background:var(--panel-2);
+      background:var(--panel2);
       border:1px solid var(--border);
       border-radius:999px;
       padding:4px;
@@ -96,46 +96,51 @@
       color:var(--muted);
       border-radius:999px;
       padding:9px 12px;
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
       letter-spacing:.02em;
     }
     .tab.active{
-      background:var(--accent-blue);
+      background:var(--blue);
       color:#fff;
     }
 
     .btn{
       border:1px solid var(--border);
-      background:var(--panel-2);
+      background:var(--panel2);
       color:var(--text);
       border-radius:12px;
       padding:9px 12px;
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
     }
     .btn.primary{
       border-color:transparent;
-      background:var(--accent-purple);
+      background:var(--purple);
       color:#fff;
     }
-    .btn:active{ transform: translateY(1px); }
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+    }
 
-    /* Main split layout */
     main{
+      padding:14px;
       display:grid;
       gap:14px;
-      padding:14px;
-      min-height:0; /* important for scroll areas */
+      min-height:0;
       grid-template-rows: 0.95fr 1.05fr; /* top slightly under half */
     }
 
     .section{
-      background:var(--panel-2);
+      background:var(--panel2);
       border:1px solid var(--border);
       border-radius:var(--radius);
       padding:12px;
       min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
 
     .section-head{
@@ -143,30 +148,41 @@
       justify-content:space-between;
       align-items:flex-end;
       gap:10px;
-      margin-bottom:10px;
       flex-wrap:wrap;
     }
-
     .section-title{
       margin:0;
-      font-size:.9rem;
-      letter-spacing:.10em;
+      font-size:.88rem;
+      letter-spacing:.12em;
       text-transform:uppercase;
       font-weight:900;
       color:#e9ecff;
     }
     .section-sub{
+      margin:4px 0 0;
       color:var(--muted);
       font-size:.85rem;
-      margin:0;
+      font-weight:700;
     }
 
-    /* Top: habits table */
+    .empty{
+      border:1px dashed #3a425c;
+      border-radius:14px;
+      padding:18px;
+      background:#0c0f19;
+      color:var(--muted);
+      text-align:center;
+      font-weight:800;
+    }
+
+    /* habits table */
     .table-wrap{
       overflow:auto;
       border-radius:12px;
       border:1px solid var(--border);
       background:#0c0f19;
+      min-height:0;
+      flex:1;
     }
     table{
       width:100%;
@@ -201,7 +217,6 @@
       letter-spacing:.01em;
     }
 
-    /* Solid checkbox */
     input[type="checkbox"]{
       appearance:none;
       -webkit-appearance:none;
@@ -215,7 +230,7 @@
     }
     input[type="checkbox"]:checked{
       border-color:transparent;
-      background:var(--accent-blue);
+      background:var(--blue);
     }
     input[type="checkbox"]:checked::after{
       content:'';
@@ -246,35 +261,28 @@
     .fill{
       height:100%;
       width:0%;
-      background:var(--accent-purple); /* solid */
+      background:var(--purple);
     }
     .pct{
-      min-width:70px;
+      min-width:84px;
       text-align:right;
       color:var(--muted);
-      font-weight:800;
+      font-weight:900;
       font-size:.85rem;
     }
 
-    .empty{
-      border:1px dashed #3a425c;
-      border-radius:14px;
-      padding:18px;
-      background:#0c0f19;
-      color:var(--muted);
-      text-align:center;
-    }
-
-    /* Bottom: analytics */
-    .analytics-grid{
+    /* bottom analytics */
+    .grid{
       display:grid;
       gap:12px;
       grid-template-columns: 1.2fr 0.8fr;
       min-height:0;
+      flex:1;
     }
+
     .cards{
       display:grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0,1fr));
       gap:12px;
       min-height:0;
     }
@@ -327,6 +335,7 @@
       font-size:10px;
       letter-spacing:.06em;
     }
+
     .stats{
       display:flex;
       flex-direction:column;
@@ -338,7 +347,7 @@
       justify-content:space-between;
       gap:10px;
       color:var(--muted);
-      font-weight:800;
+      font-weight:900;
       font-size:.85rem;
     }
     .stat b{ color:#e9ecff; }
@@ -355,12 +364,12 @@
     }
     .list h3{
       margin:0;
-      font-size:.9rem;
-      letter-spacing:.10em;
+      font-size:.88rem;
+      letter-spacing:.12em;
       text-transform:uppercase;
       font-weight:900;
     }
-    .list-items{
+    .items{
       overflow:auto;
       padding-right:4px;
       display:flex;
@@ -378,7 +387,7 @@
       border-radius:14px;
       background:#0f1320;
     }
-    .item small{ color:var(--muted); font-weight:800; }
+    .item small{ color:var(--muted); font-weight:900; }
     .badge{
       padding:6px 10px;
       border-radius:999px;
@@ -387,9 +396,44 @@
       color:#fff;
       white-space:nowrap;
     }
-    .badge.bad{ background:var(--bad); }
-    .badge.warn{ background:var(--warn); }
-    .badge.ok{ background:var(--ok); }
+    .badge.bad{ background:var(--red); }
+    .badge.warn{ background:var(--amber); }
+    .badge.ok{ background:var(--green); }
+
+    .coach{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      border:1px solid var(--border);
+      background:#0c0f19;
+      border-radius:16px;
+      padding:12px;
+    }
+    .coach-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .coach-title{
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-size:.88rem;
+      margin:0;
+    }
+    .coach-box{
+      border:1px solid var(--border);
+      background:#0f1320;
+      border-radius:14px;
+      padding:10px;
+      color:#dbe1ff;
+      font-weight:800;
+      line-height:1.35;
+    }
+    .coach-box ul{ margin:8px 0 0 18px; padding:0; }
+    .coach-box li{ margin:6px 0; }
 
     footer{
       padding:14px;
@@ -399,12 +443,12 @@
       gap:10px;
       flex-wrap:wrap;
     }
-    .foot-note{ color:var(--muted); font-size:.82rem; font-weight:700; }
+    .foot-note{ color:var(--muted); font-size:.82rem; font-weight:800; }
 
     @media (max-width: 980px){
       main{ grid-template-rows:auto auto; }
-      .analytics-grid{ grid-template-columns: 1fr; }
-      .cards{ grid-template-columns: 1fr; }
+      .grid{ grid-template-columns:1fr; }
+      .cards{ grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -422,29 +466,26 @@
           <button class="tab" data-view="monthly">Monthly</button>
         </nav>
         <button class="btn" id="exportBtn" title="Export data as JSON">Export</button>
+        <button class="btn" id="askAiBtn" title="Requires backend (disabled for now)" disabled>Ask AI</button>
         <button class="btn primary" id="addHabitBtn">+ Habit</button>
       </div>
     </header>
 
-    <main class="panel" id="mainShell">
-      <!-- injected -->
-    </main>
+    <main class="panel" id="mainShell"></main>
 
     <footer class="panel">
-      <div class="foot-note">Saved locally in your browser (no account, no server).</div>
+      <div class="foot-note">Saved locally on this device.</div>
       <button class="btn" id="resetBtn" title="Clear local data">Reset</button>
     </footer>
   </div>
 
   <script>
-    /** =========================
-     *  State & Persistence
-     * ========================= */
-    const STORAGE_KEY = 'habit-tracker-solid-ui-v1';
-    const appState = loadFromDisk() || { habits: [] };
+    // ========= State =========
+    const STORAGE_KEY = 'habit-tracker-solid-coach-v1';
+    const appState = load() || { habits: [] };
     let activeView = 'weekly';
 
-    function loadFromDisk(){
+    function load(){
       const raw = localStorage.getItem(STORAGE_KEY);
       if(!raw) return null;
       try{
@@ -460,31 +501,27 @@
       }catch{ return null; }
     }
 
-    function saveToDisk(){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-    }
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); }
 
-    function updateState(mutator){
+    function update(mutator){
       mutator(appState);
-      saveToDisk();
+      save();
       render();
     }
 
-    /** =========================
-     *  Date Helpers
-     * ========================= */
-    function formatDateKey(date){
+    // ========= Dates =========
+    function key(date){
       const y = date.getFullYear();
       const m = String(date.getMonth()+1).padStart(2,'0');
       const d = String(date.getDate()).padStart(2,'0');
       return `${y}-${m}-${d}`;
     }
 
-    function getISOWeekDates(ref = new Date()){
+    function isoWeek(ref = new Date()){
       const base = new Date(ref);
       const day = base.getDay();
-      const mondayShift = day === 0 ? -6 : 1 - day;
-      base.setDate(base.getDate() + mondayShift);
+      const shift = day === 0 ? -6 : 1 - day;
+      base.setDate(base.getDate() + shift);
       base.setHours(0,0,0,0);
       return Array.from({length:7}, (_,i)=>{
         const d = new Date(base);
@@ -493,106 +530,193 @@
       });
     }
 
-    function getMonthDays(ref = new Date()){
+    function monthDays(ref = new Date()){
       const y = ref.getFullYear();
       const m = ref.getMonth();
       const count = new Date(y, m+1, 0).getDate();
       return Array.from({length:count}, (_,i)=> new Date(y, m, i+1));
     }
 
-    /** =========================
-     *  Habit Logic
-     * ========================= */
-    function isCompletedOn(habit, dateKey){
-      return habit.completions.includes(dateKey);
-    }
+    // ========= Habit logic =========
+    function done(habit, dateKey){ return habit.completions.includes(dateKey); }
 
-    function toggleCompletion(habitId, dateKey, checked){
-      updateState((state)=>{
-        const habit = state.habits.find(h=>h.id===habitId);
-        if(!habit) return;
-        const set = new Set(habit.completions);
-        if(checked) set.add(dateKey);
-        else set.delete(dateKey);
-        habit.completions = [...set].sort();
+    function toggle(habitId, dateKey, checked){
+      update((s)=>{
+        const h = s.habits.find(x=>x.id===habitId);
+        if(!h) return;
+        const set = new Set(h.completions);
+        if(checked) set.add(dateKey); else set.delete(dateKey);
+        h.completions = [...set].sort();
       });
     }
 
-    function weekCount(habit, weekDates){
-      return weekDates.reduce((sum, d)=> sum + (isCompletedOn(habit, formatDateKey(d)) ? 1 : 0), 0);
+    function countInRange(habit, dates){
+      return dates.reduce((sum, d)=> sum + (done(habit, key(d)) ? 1 : 0), 0);
     }
 
-    function monthCount(habit, monthDays){
-      return monthDays.reduce((sum, d)=> sum + (isCompletedOn(habit, formatDateKey(d)) ? 1 : 0), 0);
-    }
-
-    function daysSinceLastCompletion(habit){
+    function lastDoneDaysAgo(habit){
       if(!habit.completions.length) return Infinity;
       const last = habit.completions[habit.completions.length - 1];
       const lastDate = new Date(last + 'T00:00:00');
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const diffMs = today - lastDate;
-      return Math.floor(diffMs / (1000*60*60*24));
+      const today = new Date(); today.setHours(0,0,0,0);
+      return Math.floor((today - lastDate) / (1000*60*60*24));
     }
 
-    /** =========================
-     *  UI Rendering
-     * ========================= */
-    function setMetaDate(){
+    function currentStreak(habit){
+      // consecutive days ending today
+      const today = new Date(); today.setHours(0,0,0,0);
+      let streak = 0;
+      for(let i=0; i<3650; i++){
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        if(done(habit, key(d))) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    // ========= Coach (real-time analysis) =========
+    function coachInsights(){
+      const now = new Date();
+      const w = isoWeek(now);
+      const m = monthDays(now);
+      const daysInMonth = m.length;
+
+      const ranked = appState.habits.map(h=>{
+        const weekDone = countInRange(h, w);
+        const monthDone = countInRange(h, m);
+        const since = lastDoneDaysAgo(h);
+        const streak = currentStreak(h);
+        const weekPct = Math.round((weekDone/7)*100);
+        const monthPct = Math.round((monthDone/daysInMonth)*100);
+
+        // Simple risk score: higher means more neglected
+        const risk =
+          (since === Infinity ? 50 : Math.min(50, since*6)) +
+          (weekPct < 30 ? 20 : weekPct < 60 ? 10 : 0) +
+          (streak >= 3 ? -10 : 0);
+
+        return { h, weekDone, weekPct, monthDone, monthPct, since, streak, risk };
+      }).sort((a,b)=> b.risk - a.risk);
+
+      const topNeglected = ranked.slice(0, Math.min(3, ranked.length));
+      const topWinners = [...ranked].sort((a,b)=> b.weekPct - a.weekPct).slice(0, Math.min(2, ranked.length));
+
+      const todayKey = key(new Date());
+      const notDoneToday = ranked.filter(r => !done(r.h, todayKey)).slice(0, 3);
+
+      const messages = [];
+
+      if(!appState.habits.length){
+        return {
+          headline: "Add 1 habit. Keep it small.",
+          bullets: ["Start with one habit you can do in 5 minutes.", "Consistency beats intensity."]
+        };
+      }
+
+      // Headline
+      const worst = topNeglected[0];
+      if(worst && worst.since >= 3){
+        messages.push(`Priority risk: "${worst.h.name}" is slipping (${worst.since === Infinity ? 'never done' : worst.since + ' days since last'}).`);
+      } else {
+        messages.push(`You’re not in trouble. Keep the loop tight today.`);
+      }
+
+      // Bullets (actions)
+      const bullets = [];
+
+      if(notDoneToday.length){
+        bullets.push(`Do these today (pick 1–3): ${notDoneToday.map(x=>`"${x.h.name}"`).join(', ')}.`);
+      }
+
+      if(topNeglected.length){
+        bullets.push(`Neglect list: ${topNeglected.map(x=>`"${x.h.name}"`).join(', ')}.`);
+      }
+
+      if(topWinners.length){
+        bullets.push(`What’s working: ${topWinners.map(x=>`"${x.h.name}"`).join(', ')}. Protect that momentum.`);
+      }
+
+      bullets.push(`Rule: if a habit is missed 2+ days, shrink it until it’s impossible to fail.`);
+
+      return { headline: messages[0], bullets };
+    }
+
+    // ========= Rendering =========
+    function esc(s){
+      return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+        .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+    }
+
+    function setMeta(){
       const now = new Date();
       document.getElementById('dateMeta').textContent = now.toLocaleString(undefined, {
         weekday:'long', year:'numeric', month:'long', day:'numeric'
       });
     }
 
-    function escapeHTML(str){
-      return String(str)
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'",'&#39;');
+    function ringSVG(percent, color){
+      const size=92, r=36, cx=size/2, cy=size/2;
+      const c=2*Math.PI*r;
+      const p=Math.max(0, Math.min(100, percent));
+      const off=c*(1-p/100);
+      return `
+        <svg class="ring" viewBox="0 0 ${size} ${size}">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1b2236" stroke-width="10" />
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="10"
+                  stroke-linecap="round"
+                  stroke-dasharray="${c}"
+                  stroke-dashoffset="${off}"
+                  transform="rotate(-90 ${cx} ${cy})"/>
+          <text x="${cx}" y="${cy+4}" text-anchor="middle">${p}%</text>
+        </svg>
+      `;
+    }
+
+    function badge(days){
+      if(days === Infinity) return {cls:'bad', label:'Never'};
+      if(days >= 7) return {cls:'bad', label:`${days}d`};
+      if(days >= 3) return {cls:'warn', label:`${days}d`};
+      return {cls:'ok', label:`${days}d`};
     }
 
     function render(){
-      setMetaDate();
+      setMeta();
       const shell = document.getElementById('mainShell');
       shell.innerHTML = '';
       shell.appendChild(renderDashboard());
-      bindDynamicEvents(shell);
+      bindDynamic(shell);
     }
 
     function renderDashboard(){
       const wrap = document.createElement('div');
-      wrap.style.display = 'grid';
-      wrap.style.gap = '14px';
-      wrap.style.height = '100%';
-      wrap.style.padding = '14px';
-      wrap.style.minHeight = '0';
-      wrap.style.gridTemplateRows = '0.95fr 1.05fr';
+      wrap.style.display='grid';
+      wrap.style.gap='14px';
+      wrap.style.height='100%';
+      wrap.style.padding='14px';
+      wrap.style.minHeight='0';
+      wrap.style.gridTemplateRows='0.95fr 1.05fr';
 
       const top = document.createElement('section');
-      top.className = 'section';
-      top.appendChild(renderHabitsTop());
+      top.className='section';
+      top.appendChild(renderHabits());
 
       const bottom = document.createElement('section');
-      bottom.className = 'section';
-      bottom.appendChild(renderAnalyticsBottom());
+      bottom.className='section';
+      bottom.appendChild(renderAnalytics());
 
       wrap.appendChild(top);
       wrap.appendChild(bottom);
-
       return wrap;
     }
 
-    function renderHabitsTop(){
+    function renderHabits(){
       const container = document.createElement('div');
 
-      const weekDates = getISOWeekDates();
+      const weekDates = isoWeek();
       const start = weekDates[0].toLocaleDateString();
       const end = weekDates[6].toLocaleDateString();
-      const modeLabel = activeView === 'weekly'
+      const label = activeView === 'weekly'
         ? `Week (Mon–Sun): ${start} → ${end}`
         : `Month: ${new Date().toLocaleString(undefined, {month:'long', year:'numeric'})}`;
 
@@ -600,249 +724,226 @@
         <div class="section-head">
           <div>
             <h2 class="section-title">Habits</h2>
-            <p class="section-sub">${escapeHTML(modeLabel)}</p>
+            <p class="section-sub">${esc(label)}</p>
           </div>
         </div>
       `;
 
       if(!appState.habits.length){
-        const empty = document.createElement('div');
-        empty.className = 'empty';
-        empty.textContent = 'No habits yet. Click “+ Habit” to add your first one.';
-        container.appendChild(empty);
+        const e = document.createElement('div');
+        e.className='empty';
+        e.textContent='No habits yet. Click “+ Habit”.';
+        container.appendChild(e);
         return container;
       }
 
       const tableWrap = document.createElement('div');
-      tableWrap.className = 'table-wrap';
+      tableWrap.className='table-wrap';
 
       const table = document.createElement('table');
-      const headerDays = activeView === 'weekly'
-        ? ['M','T','W','T','F','S','S']
-        : Array.from({length:31}, (_,i)=> String(i+1));
-
-      // build header
       const thead = document.createElement('thead');
       const hr = document.createElement('tr');
-      hr.innerHTML = `<th>Habit</th>` +
-        (activeView === 'weekly'
-          ? headerDays.map(d=>`<th>${d}</th>`).join('')
-          : headerDays.map(d=>`<th>${d}</th>`).join('')
-        ) +
-        `<th>Progress</th>`;
-      thead.appendChild(hr);
-
-      const tbody = document.createElement('tbody');
 
       if(activeView === 'weekly'){
-        appState.habits.forEach(habit=>{
-          const tr = document.createElement('tr');
-          const completed = weekCount(habit, weekDates);
-          const percent = Math.round((completed/7)*100);
+        hr.innerHTML = `<th>Habit</th>${['M','T','W','T','F','S','S'].map(d=>`<th>${d}</th>`).join('')}<th>Progress</th>`;
+        thead.appendChild(hr);
 
-          let row = `<td><div class="habit-name">${escapeHTML(habit.name)}</div></td>`;
+        const tbody = document.createElement('tbody');
+        appState.habits.forEach(h=>{
+          const tr = document.createElement('tr');
+          const doneCount = countInRange(h, weekDates);
+          const pct = Math.round((doneCount/7)*100);
+
+          let row = `<td><div class="habit-name">${esc(h.name)}</div></td>`;
           weekDates.forEach(d=>{
-            const key = formatDateKey(d);
-            const checked = isCompletedOn(habit, key) ? 'checked' : '';
-            row += `<td><input type="checkbox" data-habit-id="${habit.id}" data-date="${key}" ${checked}></td>`;
+            const dk = key(d);
+            const checked = done(h, dk) ? 'checked' : '';
+            row += `<td><input type="checkbox" data-habit-id="${h.id}" data-date="${dk}" ${checked}></td>`;
           });
 
           row += `
             <td>
               <div class="progress">
-                <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
-                <div class="pct">${completed}/7 • ${percent}%</div>
+                <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+                <div class="pct">${doneCount}/7 • ${pct}%</div>
               </div>
-            </td>
-          `;
+            </td>`;
           tr.innerHTML = row;
           tbody.appendChild(tr);
         });
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
       } else {
         const now = new Date();
-        const monthDays = getMonthDays(now);
-        const daysInMonth = monthDays.length;
+        const md = monthDays(now);
+        const daysInMonth = md.length;
 
-        appState.habits.forEach(habit=>{
+        hr.innerHTML = `<th>Habit</th>${Array.from({length:31}, (_,i)=>`<th>${i+1}</th>`).join('')}<th>Progress</th>`;
+        thead.appendChild(hr);
+
+        const tbody = document.createElement('tbody');
+        appState.habits.forEach(h=>{
           const tr = document.createElement('tr');
-          const completed = monthCount(habit, monthDays);
-          const percent = Math.round((completed / daysInMonth) * 100);
+          const doneCount = countInRange(h, md);
+          const pct = Math.round((doneCount/daysInMonth)*100);
 
-          let row = `<td><div class="habit-name">${escapeHTML(habit.name)}</div></td>`;
+          let row = `<td><div class="habit-name">${esc(h.name)}</div></td>`;
           for(let day=1; day<=31; day++){
-            const date = monthDays[day-1];
-            if(!date){
-              row += `<td style="opacity:.35">—</td>`;
-              continue;
-            }
-            const key = formatDateKey(date);
-            const checked = isCompletedOn(habit, key) ? 'checked' : '';
-            row += `<td><input type="checkbox" data-habit-id="${habit.id}" data-date="${key}" ${checked}></td>`;
+            const date = md[day-1];
+            if(!date){ row += `<td style="opacity:.35">—</td>`; continue; }
+            const dk = key(date);
+            const checked = done(h, dk) ? 'checked' : '';
+            row += `<td><input type="checkbox" data-habit-id="${h.id}" data-date="${dk}" ${checked}></td>`;
           }
 
           row += `
             <td>
               <div class="progress">
-                <div class="bar"><div class="fill" style="width:${percent}%"></div></div>
-                <div class="pct">${completed}/${daysInMonth} • ${percent}%</div>
+                <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+                <div class="pct">${doneCount}/${daysInMonth} • ${pct}%</div>
               </div>
-            </td>
-          `;
+            </td>`;
           tr.innerHTML = row;
           tbody.appendChild(tr);
         });
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
       }
 
-      table.appendChild(thead);
-      table.appendChild(tbody);
       tableWrap.appendChild(table);
       container.appendChild(tableWrap);
-
       return container;
     }
 
-    function ringChartSVG(percent, color){
-      const size = 92;
-      const r = 36;
-      const cx = size/2;
-      const cy = size/2;
-      const circumference = 2 * Math.PI * r;
-      const clamped = Math.max(0, Math.min(100, percent));
-      const offset = circumference * (1 - clamped/100);
-
-      return `
-        <svg class="ring" viewBox="0 0 ${size} ${size}" role="img" aria-label="${clamped}%">
-          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1b2236" stroke-width="10" />
-          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="10"
-                  stroke-linecap="round"
-                  stroke-dasharray="${circumference}"
-                  stroke-dashoffset="${offset}"
-                  transform="rotate(-90 ${cx} ${cy})"/>
-          <text x="${cx}" y="${cy+4}" text-anchor="middle">${clamped}%</text>
-        </svg>
-      `;
-    }
-
-    function statusBadge(days){
-      if(days === Infinity) return { cls:'bad', label:'Never' };
-      if(days >= 7) return { cls:'bad', label:`${days}d` };
-      if(days >= 3) return { cls:'warn', label:`${days}d` };
-      return { cls:'ok', label:`${days}d` };
-    }
-
-    function renderAnalyticsBottom(){
+    function renderAnalytics(){
       const container = document.createElement('div');
-
-      const now = new Date();
-      const monthDays = getMonthDays(now);
-      const daysInMonth = monthDays.length;
-      const weekDates = getISOWeekDates();
-
       container.innerHTML = `
         <div class="section-head">
           <div>
-            <h2 class="section-title">Analytics</h2>
-            <p class="section-sub">Solid, simple signals: what’s working and what’s slipping.</p>
+            <h2 class="section-title">Insights</h2>
+            <p class="section-sub">Real-time signals based on what you’re actually doing.</p>
           </div>
         </div>
       `;
 
       if(!appState.habits.length){
-        const empty = document.createElement('div');
-        empty.className = 'empty';
-        empty.textContent = 'Add at least one habit to see analytics.';
-        container.appendChild(empty);
+        const e = document.createElement('div');
+        e.className='empty';
+        e.textContent='Add habits to see insights.';
+        container.appendChild(e);
         return container;
       }
 
+      const now = new Date();
+      const w = isoWeek(now);
+      const m = monthDays(now);
+      const daysInMonth = m.length;
+
+      const ranked = appState.habits.map((h, idx)=>{
+        const weekDone = countInRange(h, w);
+        const monthDone = countInRange(h, m);
+        const weekPct = Math.round((weekDone/7)*100);
+        const monthPct = Math.round((monthDone/daysInMonth)*100);
+        const since = lastDoneDaysAgo(h);
+        const streak = currentStreak(h);
+        return { h, weekDone, weekPct, monthDone, monthPct, since, streak, idx };
+      });
+
+      // cards = top 6 by monthPct
+      const cardsData = [...ranked].sort((a,b)=> b.monthPct - a.monthPct).slice(0, 6);
+      // neglected = top 10 by since
+      const neglected = [...ranked].sort((a,b)=> (b.since - a.since)).slice(0, 10);
+
       const grid = document.createElement('div');
-      grid.className = 'analytics-grid';
+      grid.className='grid';
 
-      // Left: ring cards
       const cards = document.createElement('div');
-      cards.className = 'cards';
-
-      // Sort habits by best monthly rate
-      const ranked = [...appState.habits].map(h=>{
-        const m = monthCount(h, monthDays);
-        const w = weekCount(h, weekDates);
-        return {
-          habit: h,
-          monthDone: m,
-          monthPct: Math.round((m / daysInMonth) * 100),
-          weekDone: w,
-          weekPct: Math.round((w / 7) * 100),
-          since: daysSinceLastCompletion(h)
-        };
-      }).sort((a,b)=> b.monthPct - a.monthPct);
-
-      ranked.slice(0, 6).forEach((r, idx)=>{
-        const color = (idx % 2 === 0) ? 'var(--accent-purple)' : 'var(--accent-blue)';
-        const last = statusBadge(r.since);
-
+      cards.className='cards';
+      cardsData.forEach((r, i)=>{
+        const color = (i % 2 === 0) ? 'var(--purple)' : 'var(--blue)';
+        const b = badge(r.since);
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className='card';
         card.innerHTML = `
           <div class="card-top">
-            <div class="card-name">${escapeHTML(r.habit.name)}</div>
+            <div class="card-name">${esc(r.h.name)}</div>
             <div class="pill">Month • ${r.monthDone}/${daysInMonth}</div>
           </div>
           <div class="ring-wrap">
-            ${ringChartSVG(r.monthPct, color)}
+            ${ringSVG(r.monthPct, color)}
             <div class="stats">
               <div class="stat"><span>Week</span><b>${r.weekDone}/7 (${r.weekPct}%)</b></div>
-              <div class="stat"><span>Last done</span><b>${r.since === Infinity ? 'Never' : r.since + ' days ago'}</b></div>
-              <div class="stat"><span>Status</span><b style="color:#fff">${last.cls === 'ok' ? 'On track' : (last.cls === 'warn' ? 'Slipping' : 'Neglected')}</b></div>
+              <div class="stat"><span>Streak</span><b>${r.streak} day(s)</b></div>
+              <div class="stat"><span>Last</span><b>${r.since === Infinity ? 'Never' : r.since + 'd ago'}</b></div>
             </div>
           </div>
         `;
         cards.appendChild(card);
       });
 
-      // Right: neglected list
+      const right = document.createElement('div');
+      right.style.display='flex';
+      right.style.flexDirection='column';
+      right.style.gap='12px';
+      right.style.minHeight='0';
+
+      // coach block
+      const coachData = coachInsights();
+      const coach = document.createElement('div');
+      coach.className='coach';
+      coach.innerHTML = `
+        <div class="coach-head">
+          <h3 class="coach-title">Coach</h3>
+          <span class="pill">Auto-analysis</span>
+        </div>
+        <div class="coach-box">
+          <div style="font-weight:900">${esc(coachData.headline)}</div>
+          <ul>${coachData.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>
+        </div>
+      `;
+
+      // neglected list
       const list = document.createElement('div');
-      list.className = 'list';
-
-      const neglected = [...ranked].sort((a,b)=> b.since - a.since);
-
-      list.innerHTML = `<h3>Neglected</h3><div class="list-items"></div>`;
-      const listItems = list.querySelector('.list-items');
-
-      neglected.slice(0, 10).forEach(r=>{
-        const b = statusBadge(r.since);
+      list.className='list';
+      list.innerHTML = `<h3>Neglected</h3><div class="items"></div>`;
+      const items = list.querySelector('.items');
+      neglected.forEach(r=>{
+        const b = badge(r.since);
         const item = document.createElement('div');
-        item.className = 'item';
+        item.className='item';
         item.innerHTML = `
           <div>
-            <div style="font-weight:900">${escapeHTML(r.habit.name)}</div>
+            <div style="font-weight:900">${esc(r.h.name)}</div>
             <small>Month: ${r.monthPct}% • Week: ${r.weekPct}%</small>
           </div>
           <div class="badge ${b.cls}">${b.label}</div>
         `;
-        listItems.appendChild(item);
+        items.appendChild(item);
       });
 
-      grid.appendChild(cards);
-      grid.appendChild(list);
-      container.appendChild(grid);
+      right.appendChild(coach);
+      right.appendChild(list);
 
+      grid.appendChild(cards);
+      grid.appendChild(right);
+
+      container.appendChild(grid);
       return container;
     }
 
-    function bindDynamicEvents(root){
-      // checkboxes
+    function bindDynamic(root){
       root.querySelectorAll('input[type="checkbox"]').forEach(box=>{
         box.addEventListener('change', (e)=>{
           const { habitId, date } = e.target.dataset;
-          toggleCompletion(habitId, date, e.target.checked);
+          toggle(habitId, date, e.target.checked);
         });
       });
     }
 
-    /** =========================
-     *  Static Controls
-     * ========================= */
-    function bindTopControls(){
+    // ========= Controls =========
+    function bindControls(){
       document.querySelectorAll('.tab').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           activeView = btn.dataset.view;
@@ -855,8 +956,8 @@
       document.getElementById('addHabitBtn').addEventListener('click', ()=>{
         const name = prompt('Habit name:');
         if(!name || !name.trim()) return;
-        updateState((state)=>{
-          state.habits.push({
+        update((s)=>{
+          s.habits.push({
             id: crypto.randomUUID(),
             name: name.trim(),
             created: new Date().toISOString(),
@@ -870,22 +971,31 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `habit-tracker-${formatDateKey(new Date())}.json`;
+        a.download = `habit-tracker-${key(new Date())}.json`;
         a.click();
         URL.revokeObjectURL(url);
       });
 
       document.getElementById('resetBtn').addEventListener('click', ()=>{
-        const ok = confirm('Reset will delete habits and history on this device. Continue?');
+        const ok = confirm('Reset deletes habits + history on this device. Continue?');
         if(!ok) return;
         localStorage.removeItem(STORAGE_KEY);
         location.reload();
       });
+
+      // Placeholder for real AI: needs backend (do NOT put API keys in browser). :contentReference[oaicite:1]{index=1}
+      document.getElementById('askAiBtn').addEventListener('click', ()=>{
+        alert('AI mode requires a small backend to protect the API key. We can add that next.');
+      });
     }
 
     function init(){
-      bindTopControls();
+      bindControls();
       render();
+      const now = new Date();
+      document.getElementById('dateMeta').textContent = now.toLocaleString(undefined, {
+        weekday:'long', year:'numeric', month:'long', day:'numeric'
+      });
     }
 
     init();
