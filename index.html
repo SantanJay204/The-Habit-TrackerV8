@@ -288,7 +288,7 @@
       min-height:0;
     }
 
-    /* Visual styling shared by both <div class="card"> and <button class="card"> */
+    /* Cursor policy: only buttons look clickable */
     .card{
       border:1px solid var(--border);
       background:#0c0f19;
@@ -302,12 +302,14 @@
       cursor:default;
     }
 
-    /* Button-only behavior */
     button.card{
       cursor:pointer;
+
+      /* normalize button defaults without breaking .card visuals */
+      appearance:none;
+      -webkit-appearance:none;
       border:0;
       background:transparent;
-      /* padding intentionally NOT reset so .card padding applies */
       color:inherit;
       font:inherit;
     }
@@ -414,12 +416,12 @@
     }
     .item small{ color:var(--muted); font-weight:900; }
 
-    /* Neglected rows are <button class="item"> — normalize button defaults */
+    /* Neglected rows are <button class="item"> — normalize defaults, keep .item layout/visuals */
     button.item{
       width:100%;
       cursor:pointer;
 
-      /* keep the same layout as .item */
+      /* keep the same layout as .item (1:1 hitbox) */
       display:flex;
       justify-content:space-between;
       align-items:center;
