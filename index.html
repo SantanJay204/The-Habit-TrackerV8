@@ -129,7 +129,7 @@
       display:grid;
       gap:14px;
       min-height:0;
-      grid-template-rows: 0.95fr 1.05fr; /* top slightly under half */
+      grid-template-rows: 0.95fr 1.05fr;
     }
 
     .section{
@@ -149,6 +149,7 @@
       align-items:flex-end;
       gap:10px;
       flex-wrap:wrap;
+      flex: 0 0 auto;
     }
     .section-title{
       margin:0;
@@ -286,6 +287,8 @@
       gap:12px;
       min-height:0;
     }
+
+    /* Visual styling shared by both <div class="card"> and <button class="card"> */
     .card{
       border:1px solid var(--border);
       background:#0c0f19;
@@ -295,7 +298,28 @@
       flex-direction:column;
       gap:10px;
       min-height:0;
+      text-align:left;
+      cursor:default;
     }
+
+    /* Button-only behavior */
+    button.card{
+      cursor:pointer;
+      border:0;
+      background:transparent;
+      /* padding intentionally NOT reset so .card padding applies */
+      color:inherit;
+      font:inherit;
+    }
+    button.card:focus{
+      outline:2px solid var(--blue);
+      outline-offset:2px;
+    }
+    button.card[disabled]{
+      cursor:default;
+      opacity:1;
+    }
+
     .card-top{
       display:flex;
       justify-content:space-between;
@@ -377,6 +401,7 @@
       gap:8px;
       min-height:0;
     }
+
     .item{
       display:flex;
       justify-content:space-between;
@@ -388,6 +413,31 @@
       background:#0f1320;
     }
     .item small{ color:var(--muted); font-weight:900; }
+
+    /* Neglected rows are <button class="item"> — normalize button defaults */
+    button.item{
+      width:100%;
+      cursor:pointer;
+
+      /* keep the same layout as .item */
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+
+      appearance:none;
+      -webkit-appearance:none;
+      border:0;
+      background:transparent;
+      color:inherit;
+      font:inherit;
+      padding:0;
+    }
+    button.item:focus{
+      outline:2px solid var(--blue);
+      outline-offset:2px;
+    }
+
     .badge{
       padding:6px 10px;
       border-radius:999px;
@@ -450,6 +500,53 @@
       .grid{ grid-template-columns:1fr; }
       .cards{ grid-template-columns:1fr; }
     }
+
+    /* Expand-to-full system */
+    body[data-expanded] { overflow: hidden; }
+
+    /* Dim backdrop in fullscreen (solid, no gradient) */
+    body[data-expanded]::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:#070912;
+      opacity:.88;
+      z-index:9998;
+    }
+
+    .section { min-height: 0; }
+
+    .section .section-body{
+      min-height:0;
+      overflow:auto;
+      padding-top:2px;
+      flex: 1 1 auto;
+    }
+
+    /* Fullscreen state */
+    body[data-expanded="ops"] #insightsSection,
+    body[data-expanded="insights"] #opsSection {
+      display: none;
+    }
+
+    body[data-expanded] #opsSection,
+    body[data-expanded] #insightsSection {
+      position: fixed;
+      inset: 14px;
+      z-index: 9999;
+      border-radius: var(--radius);
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    /* Close visibility: CSS controls only */
+    [data-close]{ display:none; }
+    [data-close][hidden]{ display:none; }
+    body[data-expanded] [data-close]{ display:inline-flex !important; }
+
+    /* Expand visibility */
+    body[data-expanded] [data-expand] { display: none !important; }
   </style>
 </head>
 <body>
@@ -484,6 +581,7 @@
     const STORAGE_KEY = 'habit-tracker-solid-coach-v1';
     const appState = load() || { habits: [] };
     let activeView = 'weekly';
+    let insightsDetailHabitId = null;
 
     function load(){
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -563,7 +661,6 @@
     }
 
     function currentStreak(habit){
-      // consecutive days ending today
       const today = new Date(); today.setHours(0,0,0,0);
       let streak = 0;
       for(let i=0; i<3650; i++){
@@ -575,7 +672,7 @@
       return streak;
     }
 
-    // ========= Coach (real-time analysis) =========
+    // ========= Coach =========
     function coachInsights(){
       const now = new Date();
       const w = isoWeek(now);
@@ -590,7 +687,6 @@
         const weekPct = Math.round((weekDone/7)*100);
         const monthPct = Math.round((monthDone/daysInMonth)*100);
 
-        // Simple risk score: higher means more neglected
         const risk =
           (since === Infinity ? 50 : Math.min(50, since*6)) +
           (weekPct < 30 ? 20 : weekPct < 60 ? 10 : 0) +
@@ -605,8 +701,6 @@
       const todayKey = key(new Date());
       const notDoneToday = ranked.filter(r => !done(r.h, todayKey)).slice(0, 3);
 
-      const messages = [];
-
       if(!appState.habits.length){
         return {
           headline: "Add 1 habit. Keep it small.",
@@ -614,7 +708,7 @@
         };
       }
 
-      // Headline
+      const messages = [];
       const worst = topNeglected[0];
       if(worst && worst.since >= 3){
         messages.push(`Priority risk: "${worst.h.name}" is slipping (${worst.since === Infinity ? 'never done' : worst.since + ' days since last'}).`);
@@ -622,21 +716,17 @@
         messages.push(`You’re not in trouble. Keep the loop tight today.`);
       }
 
-      // Bullets (actions)
       const bullets = [];
 
       if(notDoneToday.length){
         bullets.push(`Do these today (pick 1–3): ${notDoneToday.map(x=>`"${x.h.name}"`).join(', ')}.`);
       }
-
       if(topNeglected.length){
         bullets.push(`Neglect list: ${topNeglected.map(x=>`"${x.h.name}"`).join(', ')}.`);
       }
-
       if(topWinners.length){
         bullets.push(`What’s working: ${topWinners.map(x=>`"${x.h.name}"`).join(', ')}. Protect that momentum.`);
       }
-
       bullets.push(`Rule: if a habit is missed 2+ days, shrink it until it’s impossible to fail.`);
 
       return { headline: messages[0], bullets };
@@ -646,6 +736,14 @@
     function esc(s){
       return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
         .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+    }
+
+    function safeFileName(name){
+      return String(name || '')
+        .trim()
+        .replace(/[^a-z0-9_\-]+/gi,'_')
+        .replace(/^_+|_+$/g,'')
+        .slice(0, 60) || 'habit';
     }
 
     function setMeta(){
@@ -693,26 +791,39 @@
       wrap.style.display='grid';
       wrap.style.gap='14px';
       wrap.style.height='100%';
-      wrap.style.padding='14px';
       wrap.style.minHeight='0';
       wrap.style.gridTemplateRows='0.95fr 1.05fr';
 
-      const top = document.createElement('section');
-      top.className='section';
-      top.appendChild(renderHabits());
+      const ops = document.createElement('section');
+      ops.className='section';
+      ops.id='opsSection';
 
-      const bottom = document.createElement('section');
-      bottom.className='section';
-      bottom.appendChild(renderAnalytics());
+      const opsHead = renderHabitsHeader();
+      const opsBody = document.createElement('div');
+      opsBody.className='section-body';
+      opsBody.appendChild(renderHabitsBody());
 
-      wrap.appendChild(top);
-      wrap.appendChild(bottom);
+      ops.appendChild(opsHead);
+      ops.appendChild(opsBody);
+
+      const insights = document.createElement('section');
+      insights.className='section';
+      insights.id='insightsSection';
+
+      const insHead = renderInsightsHeader();
+      const insBody = document.createElement('div');
+      insBody.className='section-body';
+      insBody.appendChild(renderAnalyticsBody());
+
+      insights.appendChild(insHead);
+      insights.appendChild(insBody);
+
+      wrap.appendChild(ops);
+      wrap.appendChild(insights);
       return wrap;
     }
 
-    function renderHabits(){
-      const container = document.createElement('div');
-
+    function renderHabitsHeader(){
       const weekDates = isoWeek();
       const start = weekDates[0].toLocaleDateString();
       const end = weekDates[6].toLocaleDateString();
@@ -720,14 +831,23 @@
         ? `Week (Mon–Sun): ${start} → ${end}`
         : `Month: ${new Date().toLocaleString(undefined, {month:'long', year:'numeric'})}`;
 
-      container.innerHTML = `
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">Habits</h2>
-            <p class="section-sub">${esc(label)}</p>
-          </div>
+      const head = document.createElement('div');
+      head.className = 'section-head';
+      head.innerHTML = `
+        <div>
+          <h2 class="section-title">Habits</h2>
+          <p class="section-sub">${esc(label)}</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn" data-expand="ops" aria-label="Expand Operations">Expand</button>
+          <button class="btn" data-close aria-label="Close Fullscreen">Close (Esc)</button>
         </div>
       `;
+      return head;
+    }
+
+    function renderHabitsBody(){
+      const container = document.createElement('div');
 
       if(!appState.habits.length){
         const e = document.createElement('div');
@@ -745,6 +865,7 @@
       const hr = document.createElement('tr');
 
       if(activeView === 'weekly'){
+        const weekDates = isoWeek();
         hr.innerHTML = `<th>Habit</th>${['M','T','W','T','F','S','S'].map(d=>`<th>${d}</th>`).join('')}<th>Progress</th>`;
         thead.appendChild(hr);
 
@@ -758,7 +879,7 @@
           weekDates.forEach(d=>{
             const dk = key(d);
             const checked = done(h, dk) ? 'checked' : '';
-            row += `<td><input type="checkbox" data-habit-id="${h.id}" data-date="${dk}" ${checked}></td>`;
+            row += `<td><input type="checkbox" data-habit-id="${h.id}" data-date="${dk}" ${checked} aria-label="${esc(h.name)} ${dk}"></td>`;
           });
 
           row += `
@@ -794,7 +915,7 @@
             if(!date){ row += `<td style="opacity:.35">—</td>`; continue; }
             const dk = key(date);
             const checked = done(h, dk) ? 'checked' : '';
-            row += `<td><input type="checkbox" data-habit-id="${h.id}" data-date="${dk}" ${checked}></td>`;
+            row += `<td><input type="checkbox" data-habit-id="${h.id}" data-date="${dk}" ${checked} aria-label="${esc(h.name)} ${dk}"></td>`;
           }
 
           row += `
@@ -817,16 +938,24 @@
       return container;
     }
 
-    function renderAnalytics(){
-      const container = document.createElement('div');
-      container.innerHTML = `
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">Insights</h2>
-            <p class="section-sub">Real-time signals based on what you’re actually doing.</p>
-          </div>
+    function renderInsightsHeader(){
+      const head = document.createElement('div');
+      head.className = 'section-head';
+      head.innerHTML = `
+        <div>
+          <h2 class="section-title">Insights</h2>
+          <p class="section-sub">Real-time signals based on what you’re actually doing.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn" data-expand="insights" aria-label="Expand Insights">Expand</button>
+          <button class="btn" data-close aria-label="Close Fullscreen">Close (Esc)</button>
         </div>
       `;
+      return head;
+    }
+
+    function renderAnalyticsBody(){
+      const container = document.createElement('div');
 
       if(!appState.habits.length){
         const e = document.createElement('div');
@@ -834,6 +963,10 @@
         e.textContent='Add habits to see insights.';
         container.appendChild(e);
         return container;
+      }
+
+      if (insightsDetailHabitId) {
+        return renderHabitDetail(insightsDetailHabitId);
       }
 
       const now = new Date();
@@ -851,9 +984,7 @@
         return { h, weekDone, weekPct, monthDone, monthPct, since, streak, idx };
       });
 
-      // cards = top 6 by monthPct
       const cardsData = [...ranked].sort((a,b)=> b.monthPct - a.monthPct).slice(0, 6);
-      // neglected = top 10 by since
       const neglected = [...ranked].sort((a,b)=> (b.since - a.since)).slice(0, 10);
 
       const grid = document.createElement('div');
@@ -863,9 +994,13 @@
       cards.className='cards';
       cardsData.forEach((r, i)=>{
         const color = (i % 2 === 0) ? 'var(--purple)' : 'var(--blue)';
-        const b = badge(r.since);
-        const card = document.createElement('div');
+
+        const card = document.createElement('button');
+        card.type = 'button';
         card.className='card';
+        card.setAttribute('data-open-habit', r.h.id);
+        card.setAttribute('aria-label', `Open details for ${r.h.name}`);
+
         card.innerHTML = `
           <div class="card-top">
             <div class="card-name">${esc(r.h.name)}</div>
@@ -889,7 +1024,6 @@
       right.style.gap='12px';
       right.style.minHeight='0';
 
-      // coach block
       const coachData = coachInsights();
       const coach = document.createElement('div');
       coach.className='coach';
@@ -904,15 +1038,18 @@
         </div>
       `;
 
-      // neglected list
       const list = document.createElement('div');
       list.className='list';
       list.innerHTML = `<h3>Neglected</h3><div class="items"></div>`;
       const items = list.querySelector('.items');
+
       neglected.forEach(r=>{
         const b = badge(r.since);
-        const item = document.createElement('div');
+        const item = document.createElement('button');
+        item.type = 'button';
         item.className='item';
+        item.setAttribute('data-open-habit', r.h.id);
+        item.setAttribute('aria-label', `Open details for ${r.h.name}`);
         item.innerHTML = `
           <div>
             <div style="font-weight:900">${esc(r.h.name)}</div>
@@ -930,6 +1067,128 @@
       grid.appendChild(right);
 
       container.appendChild(grid);
+      return container;
+    }
+
+    function renderHabitDetail(habitId){
+      const h = appState.habits.find(x => x.id === habitId);
+      const container = document.createElement('div');
+
+      if(!h){
+        container.className='empty';
+        container.textContent='Habit not found.';
+        return container;
+      }
+
+      const now = new Date();
+      const w = isoWeek(now);
+      const m = monthDays(now);
+      const daysInMonth = m.length;
+
+      const weekDone = countInRange(h, w);
+      const monthDone = countInRange(h, m);
+      const weekPct = Math.round((weekDone/7)*100);
+      const monthPct = Math.round((monthDone/daysInMonth)*100);
+      const since = lastDoneDaysAgo(h);
+      const streak = currentStreak(h);
+
+      const today = new Date(); today.setHours(0,0,0,0);
+      const last14 = Array.from({length:14}, (_,i)=>{
+        const d = new Date(today);
+        d.setDate(today.getDate() - (13 - i));
+        return d;
+      });
+
+      container.innerHTML = `
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">${esc(h.name)} • Detail</h2>
+            <p class="section-sub">Deep view of consistency and recency.</p>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn" data-detail-close type="button">Back</button>
+            <button class="btn" data-close aria-label="Close Fullscreen">Close (Esc)</button>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1fr 0.9fr;">
+          <div class="cards" style="grid-template-columns: repeat(2, minmax(0,1fr));">
+            <div class="card">
+              <div class="card-top">
+                <div class="card-name">Monthly</div>
+                <div class="pill">${monthDone}/${daysInMonth}</div>
+              </div>
+              <div class="ring-wrap">
+                ${ringSVG(monthPct, 'var(--purple)')}
+                <div class="stats">
+                  <div class="stat"><span>Week</span><b>${weekDone}/7 (${weekPct}%)</b></div>
+                  <div class="stat"><span>Streak</span><b>${streak} day(s)</b></div>
+                  <div class="stat"><span>Last</span><b>${since === Infinity ? 'Never' : since + 'd ago'}</b></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-top">
+                <div class="card-name">Last 14 Days</div>
+                <div class="pill">Tap to mark</div>
+              </div>
+              <div style="display:grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap:8px;">
+                ${last14.map(d=>{
+                  const dk = key(d);
+                  const checked = done(h, dk) ? 'checked' : '';
+                  return `
+                    <label style="display:flex; flex-direction:column; gap:6px; align-items:center; padding:8px; border:1px solid var(--border); border-radius:12px; background:#0f1320;">
+                      <div style="font-weight:900; font-size:.78rem; color:var(--muted)">${d.getMonth()+1}/${d.getDate()}</div>
+                      <input type="checkbox" data-habit-id="${h.id}" data-date="${dk}" ${checked} aria-label="${esc(h.name)} ${dk}">
+                    </label>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px; min-height:0;">
+            <div class="coach">
+              <div class="coach-head">
+                <h3 class="coach-title">Coach</h3>
+                <span class="pill">Single-habit</span>
+              </div>
+              <div class="coach-box">
+                <div style="font-weight:900">
+                  ${since >= 3 ? `This habit is sliding (${since === Infinity ? 'never done' : since + ' days since last'}).` : `This habit is stable. Keep the loop tight.`}
+                </div>
+                <ul>
+                  <li>Minimum viable version: reduce it until you can’t fail.</li>
+                  <li>Lock a trigger: attach it to a fixed daily event.</li>
+                  <li>Don’t “make up” misses. Just restart today.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="list" style="min-height:0;">
+              <h3>Quick Actions</h3>
+              <div class="items">
+                <div class="item">
+                  <div>
+                    <div style="font-weight:900">Mark today complete</div>
+                    <small>${key(new Date())}</small>
+                  </div>
+                  <button class="btn primary" type="button" data-mark-today="${h.id}">Done</button>
+                </div>
+                <div class="item">
+                  <div>
+                    <div style="font-weight:900">Export habit history</div>
+                    <small>JSON only</small>
+                  </div>
+                  <button class="btn" type="button" data-export-habit="${h.id}">Export</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
       return container;
     }
 
@@ -983,19 +1242,134 @@
         location.reload();
       });
 
-      // Placeholder for real AI: needs backend (do NOT put API keys in browser). :contentReference[oaicite:1]{index=1}
       document.getElementById('askAiBtn').addEventListener('click', ()=>{
         alert('AI mode requires a small backend to protect the API key. We can add that next.');
       });
     }
 
+    // ========= Expand-to-full + Detail =========
+    let lastFocus = null;
+
+    function setExpanded(which) {
+      lastFocus = document.activeElement;
+      document.body.setAttribute('data-expanded', which);
+
+      requestAnimationFrame(() => {
+        const section = which === 'ops'
+          ? document.getElementById('opsSection')
+          : document.getElementById('insightsSection');
+        section?.querySelector('[data-close]')?.focus?.();
+      });
+    }
+
+    function clearExpanded() {
+      insightsDetailHabitId = null;
+      document.body.removeAttribute('data-expanded');
+
+      render();
+
+      const toFocus = lastFocus;
+      lastFocus = null;
+      requestAnimationFrame(() => toFocus?.focus?.());
+    }
+
+    function openInsightsDetail(habitId, openerEl){
+      lastFocus = openerEl || document.activeElement;
+
+      insightsDetailHabitId = habitId;
+      document.body.setAttribute('data-expanded', 'insights');
+      render();
+
+      requestAnimationFrame(() => {
+        document.getElementById('insightsSection')?.querySelector('[data-close]')?.focus?.();
+      });
+    }
+
+    function closeInsightsDetail(){
+      insightsDetailHabitId = null;
+      render();
+
+      requestAnimationFrame(() => {
+        const sec = document.getElementById('insightsSection');
+        const target =
+          sec?.querySelector('[data-open-habit]') ||
+          sec?.querySelector('[data-close]');
+        target?.focus?.();
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      // Guard: interactive elements inside openables should not trigger open
+      if (e.target.closest('button.btn, input, label, a, select, textarea')) return;
+
+      const open = e.target.closest('[data-open-habit]');
+      if(open){
+        openInsightsDetail(open.getAttribute('data-open-habit'), open);
+        return;
+      }
+
+      const back = e.target.closest('[data-detail-close]');
+      if(back){
+        closeInsightsDetail();
+        return;
+      }
+
+      const mark = e.target.closest('[data-mark-today]');
+      if(mark){
+        const id = mark.getAttribute('data-mark-today');
+        toggle(id, key(new Date()), true);
+        return;
+      }
+
+      const expH = e.target.closest('[data-export-habit]');
+      if(expH){
+        const id = expH.getAttribute('data-export-habit');
+        const h = appState.habits.find(x=>x.id===id);
+        if(!h) return;
+        const blob = new Blob([JSON.stringify(h, null, 2)], { type:'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `habit-${safeFileName(h.name)}-${key(new Date())}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      const expandBtn = e.target.closest('[data-expand]');
+      if (expandBtn) {
+        const which = expandBtn.getAttribute('data-expand');
+        setExpanded(which);
+        return;
+      }
+
+      const closeBtn = e.target.closest('[data-close]');
+      if (closeBtn) {
+        clearExpanded();
+        return;
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const openable = e.target?.closest?.('[data-open-habit]');
+      if (openable && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        openInsightsDetail(openable.getAttribute('data-open-habit'), openable);
+        return;
+      }
+
+      if (e.key === 'Escape' && document.body.hasAttribute('data-expanded')) {
+        if (insightsDetailHabitId) {
+          closeInsightsDetail();
+          return;
+        }
+        clearExpanded();
+      }
+    });
+
     function init(){
       bindControls();
       render();
-      const now = new Date();
-      document.getElementById('dateMeta').textContent = now.toLocaleString(undefined, {
-        weekday:'long', year:'numeric', month:'long', day:'numeric'
-      });
     }
 
     init();
